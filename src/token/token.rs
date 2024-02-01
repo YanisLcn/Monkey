@@ -1,6 +1,6 @@
-use std::fmt;
+use std::{fmt, mem};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, Hash)]
 pub enum Token {
     ILLEGAL(String),
     EOF,
@@ -26,6 +26,7 @@ pub enum Token {
     COMMA,
     SEMICOLON,
     COLON,
+    QUOTE,
 
     LPAREN,
     RPAREN,
@@ -44,14 +45,20 @@ pub enum Token {
     FALSE,
 }
 
+impl PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        mem::discriminant(self) == mem::discriminant(other)
+    }
+}
+
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Token::ILLEGAL(s) => write!(f, "ILLEGAL : {}", s),
             Token::EOF => write!(f, "EOF"),
-            Token::IDENT(s) => write!(f, "Identifier : {}", s),
-            Token::INT(s) => write!(f, "Int : {}", s),
-            Token::STRING(s) => write!(f, "String: {}", s),
+            Token::IDENT(s) => write!(f, "{}", s),
+            Token::INT(s) => write!(f, "{}", s),
+            Token::STRING(s) => write!(f, "{}", s),
             Token::ASSIGN => write!(f, "="),
             Token::EQ => write!(f, "=="),
             Token::NE => write!(f, "!="),
@@ -65,6 +72,7 @@ impl fmt::Display for Token {
             Token::COMMA => write!(f, ","),
             Token::SEMICOLON => write!(f, ";"),
             Token::COLON => write!(f, ":"),
+            Token::QUOTE => write!(f, "\""),
             Token::LPAREN => write!(f, "("),
             Token::RPAREN => write!(f, ")"),
             Token::LBRACE => write!(f, "{{"),

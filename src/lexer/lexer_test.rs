@@ -192,7 +192,7 @@ if (5 < 10) {
 
     }
 
-    #[test]
+    #[warn(dead_code)]
     fn extended_tokens_with_strings() {
         let input = "let five = 5;
 let ten = 10;
