@@ -94,21 +94,10 @@ return 838383;
     }
 
     #[test]
-    fn test_program_display() {
-        let program = Program {
-            statements: vec![Statement::LetStatement(LetStatement {
-                name: Identifier {
-                    value: "myvar".to_string(),
-                },
-                value: Expression::Identifier(Identifier {
-                    value: "anothervar".to_string(),
-                }),
-            })],
-        };
-
+    fn test_let_statement_display() {
+        let input = "let  myvar  =  anothervar;";
         let expected = "let myvar = anothervar;";
-
-        assert_eq!(format!("{program}"), expected);
+        test_parsing_display_format(input, expected);
     }
 
     #[test]
@@ -198,13 +187,21 @@ return 838383;
         check_parse_errors(&parser);
         assert_eq!(parser.errors().len(), errors);
         assert_eq!(program.statements.len(), expected_statements.len());
-        // assert_eq!(expected_statements, program.statements);
 
         zip(expected_statements, program.statements)
             .into_iter()
             .for_each(|(expect_stmt, stmt)| {
                 assert_eq!(stmt, expect_stmt);
             });
+    }
+
+    fn test_parsing_display_format(input: &str, expected_format: &str) {
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+
+        assert_eq!(format!("{program}"), expected_format);
     }
 
     fn check_parse_errors(parser: &Parser) {
