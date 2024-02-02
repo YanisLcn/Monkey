@@ -4,10 +4,9 @@ pub mod parser_test {
 
     use crate::{
         ast::ast::{
-            Expression, Identifier, InfixExpr, LetStatement, PrefixExpr, Program, ReturnStatement,
-            Statement,
+            Expression, Identifier, InfixExpr, LetStatement, PrefixExpr, ReturnStatement, Statement,
         },
-        lexer::lexer::Lexer,
+        lexer::{self, lexer::Lexer},
         parser::parser::Parser,
         token::token::Token,
     };
@@ -173,6 +172,60 @@ return 838383;
         ];
 
         test_parsing_statements(input, 0, expected_statements);
+    }
+
+    #[test]
+    fn test_parsing_single_operator_precedence() {
+        let input = "a + b + c;";
+
+        let left = Expression::Infix(InfixExpr {
+            operator: Token::PLUS,
+            left_expr: Box::new(Expression::Identifier(Identifier {
+                value: "a".to_string(),
+            })),
+            right_expr: Box::new(Expression::Identifier(Identifier {
+                value: "b".to_string(),
+            })),
+        });
+
+        let expected = Statement::ExpressionStatement(Expression::Infix(InfixExpr {
+            operator: Token::PLUS,
+            left_expr: Box::new(left),
+            right_expr: Box::new(Expression::Identifier(Identifier {
+                value: "c".to_string(),
+            })),
+        }));
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let program = parser.parse_program();
+
+        assert_eq!(program.statements, vec![expected]);
+    }
+
+    #[test]
+    fn test_parsing_operator_precedence_display() {
+        let input_expect = vec![
+            ("-a * b", "((-a) * b);"),
+            ("!-a", "(!(-a));"),
+            ("a + b + c", "((a + b) + c);"),
+            ("a + b - c", "((a + b) - c);"),
+            ("a * b * c", "((a * b) * c);"),
+            ("a * b / c", "((a * b) / c);"),
+            ("a + b / c", "(a + (b / c));"),
+            ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f);"),
+            ("3 + 4; -5 * 5", "(3 + 4)((-5) * 5);"),
+            ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4));"),
+            ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4));"),
+            (
+                "3 + 4 * 5 == 3 * 1 + 4 * 5",
+                "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)));",
+            ),
+        ];
+
+        input_expect
+            .iter()
+            .for_each(|(i, e)| test_parsing_display_format(i, e));
     }
 
     fn build_infix_expr_statement(token: Token, left: Expression, right: Expression) -> Statement {
