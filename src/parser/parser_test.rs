@@ -140,19 +140,6 @@ return 838383;
     }
 
     #[test]
-    fn test_parsing_single_infix_expression() {
-        let input = "1 + 3;";
-
-        let expected_statements = vec![build_infix_expr_statement(
-            Token::PLUS,
-            Expression::Integer(1),
-            Expression::Integer(3),
-        )];
-
-        test_parsing_statements(input, 0, expected_statements);
-    }
-
-    #[test]
     fn test_parsing_infix_expression() {
         let input = "1 + 3; 3 - 4; 12 * 12; 1 / 2; 6 > 5; 6 < 5; 1 == 2; 0 != 0;";
 
@@ -172,35 +159,6 @@ return 838383;
         ];
 
         test_parsing_statements(input, 0, expected_statements);
-    }
-
-    #[test]
-    fn test_parsing_single_operator_precedence() {
-        let input = "a + b + c;";
-
-        let left = Expression::Infix(InfixExpr {
-            operator: Token::PLUS,
-            left_expr: Box::new(Expression::Identifier(Identifier {
-                value: "a".to_string(),
-            })),
-            right_expr: Box::new(Expression::Identifier(Identifier {
-                value: "b".to_string(),
-            })),
-        });
-
-        let expected = Statement::ExpressionStatement(Expression::Infix(InfixExpr {
-            operator: Token::PLUS,
-            left_expr: Box::new(left),
-            right_expr: Box::new(Expression::Identifier(Identifier {
-                value: "c".to_string(),
-            })),
-        }));
-
-        let lexer = Lexer::new(input);
-        let mut parser = Parser::new(lexer);
-        let program = parser.parse_program();
-
-        assert_eq!(program.statements, vec![expected]);
     }
 
     #[test]
