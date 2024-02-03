@@ -91,8 +91,12 @@ impl Parser {
             return None;
         };
 
-        //TODO!: Parse Expression
-        let value: Identifier = Identifier::new(self.peek_tok.to_string());
+        self.next_token();
+
+        let value = match self.parse_expression(Precedence::LOWEST) {
+            None => Expression::Identifier(Identifier { value: "ILLEGAL".to_string() }),
+            Some(expr) => expr,
+        };
 
         //TODO!: "We're skipping the expressions until we encounter a semicolon
         while !self.current_token_is(Token::SEMICOLON) {

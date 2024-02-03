@@ -38,11 +38,8 @@ pub struct LetStatement {
 /** STATEMENTS */
 
 impl LetStatement {
-    pub(crate) fn new(name: Identifier, value: Identifier) -> Self {
-        LetStatement {
-            name,
-            value: Expression::new(value),
-        }
+    pub(crate) fn new(name: Identifier, value: Expression) -> Self {
+        LetStatement { name, value }
     }
 }
 
