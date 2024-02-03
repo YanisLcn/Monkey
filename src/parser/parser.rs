@@ -94,7 +94,9 @@ impl Parser {
         self.next_token();
 
         let value = match self.parse_expression(Precedence::LOWEST) {
-            None => Expression::Identifier(Identifier { value: "ILLEGAL".to_string() }),
+            None => Expression::Identifier(Identifier {
+                value: "ILLEGAL".to_string(),
+            }),
             Some(expr) => expr,
         };
 
@@ -110,7 +112,9 @@ impl Parser {
         self.next_token();
 
         let value = match self.parse_expression(Precedence::LOWEST) {
-            None => Expression::Identifier(Identifier { value: "ILLEGAL".to_string() }),
+            None => Expression::Identifier(Identifier {
+                value: "ILLEGAL".to_string(),
+            }),
             Some(expr) => expr,
         };
 
@@ -192,6 +196,7 @@ impl Parser {
             Token::SUB => self.parse_prefix_expression(),
             Token::TRUE => self.parse_boolean(),
             Token::FALSE => self.parse_boolean(),
+            Token::LPAREN => self.parse_grouped_expression(),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No prefix parse function found for {}.", t).to_string());
@@ -231,6 +236,18 @@ impl Parser {
                 self.peek_errors(format!("No infix parse function found for {}.", t).to_string());
                 None
             }
+        }
+    }
+
+    pub fn parse_grouped_expression(&mut self) -> Option<Expression> {
+        self.next_token();
+
+        let expr = self.parse_expression(Precedence::LOWEST);
+
+        if self.expect_token(Token::RPAREN) {
+            expr
+        } else {
+            None
         }
     }
 
