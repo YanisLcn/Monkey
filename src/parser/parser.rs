@@ -137,7 +137,6 @@ impl Parser {
                     self.next_token();
                     match self.parse_infix(self.current_tok.clone(), expr.clone()) {
                         Some(infix_expr) => {
-                            self.next_token();
                             expr = infix_expr;
                         }
                         None => {return Some(expr);},
