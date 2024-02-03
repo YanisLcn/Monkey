@@ -139,9 +139,11 @@ impl Parser {
                         Some(infix_expr) => {
                             expr = infix_expr;
                         }
-                        None => {return Some(expr);},
+                        None => {
+                            return Some(expr);
+                        }
                     }
-                };
+                }
                 Some(expr)
             }
         }
@@ -158,6 +160,10 @@ impl Parser {
             Token::INT(i) => Some(Expression::Integer(i.clone().parse::<i32>().unwrap())),
             _ => None,
         }
+    }
+
+    pub fn parse_boolean(&mut self) -> Option<Expression> {
+        Some(Expression::Bool(self.current_token_is(Token::TRUE)))
     }
 
     pub fn parse_prefix_expression(&mut self) -> Option<Expression> {
@@ -177,6 +183,8 @@ impl Parser {
             Token::INT(_) => self.parse_integer(),
             Token::BANG => self.parse_prefix_expression(),
             Token::SUB => self.parse_prefix_expression(),
+            Token::TRUE => self.parse_boolean(),
+            Token::FALSE => self.parse_boolean(),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No prefix parse function found for {}.", t).to_string());
