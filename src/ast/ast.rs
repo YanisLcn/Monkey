@@ -49,10 +49,8 @@ pub struct ReturnStatement {
 }
 
 impl ReturnStatement {
-    pub(crate) fn new(value: Identifier) -> Self {
-        ReturnStatement {
-            value: Expression::new(value),
-        }
+    pub(crate) fn new(value: Expression) -> Self {
+        ReturnStatement { value }
     }
 }
 

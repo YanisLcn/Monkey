@@ -109,14 +109,17 @@ impl Parser {
     pub fn parse_return_statement(&mut self) -> Option<Statement> {
         self.next_token();
 
-        let statement = Identifier::new(self.current_tok.to_string());
+        let value = match self.parse_expression(Precedence::LOWEST) {
+            None => Expression::Identifier(Identifier { value: "ILLEGAL".to_string() }),
+            Some(expr) => expr,
+        };
 
         //TODO!: "We're skipping the expressions until we encounter a semicolon
         while !self.current_token_is(Token::SEMICOLON) {
             self.next_token();
         }
 
-        Some(Statement::ReturnStatement(ReturnStatement::new(statement)))
+        Some(Statement::ReturnStatement(ReturnStatement::new(value)))
     }
 
     pub fn parse_expression_statement(&mut self) -> Option<Statement> {
