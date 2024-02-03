@@ -6,7 +6,7 @@ pub mod parser_test {
         ast::ast::{
             Expression, Identifier, InfixExpr, LetStatement, PrefixExpr, ReturnStatement, Statement,
         },
-        lexer::{self, lexer::Lexer},
+        lexer::lexer::Lexer,
         parser::parser::Parser,
         token::token::Token,
     };
@@ -184,6 +184,30 @@ return 838383;
         input_expect
             .iter()
             .for_each(|(i, e)| test_parsing_display_format(i, e));
+    }
+
+    #[test]
+    fn test_bool() {
+        let input = "true; false; let foobar = true; let barfoo = false;";
+
+        let expected_statements = vec![
+            Statement::ExpressionStatement(Expression::Bool(true)),
+            Statement::ExpressionStatement(Expression::Bool(false)),
+            Statement::LetStatement(LetStatement {
+                name: Identifier {
+                    value: "foobar".to_string(),
+                },
+                value: Expression::Bool(true),
+            }),
+            Statement::LetStatement(LetStatement {
+                name: Identifier {
+                    value: "barfoo".to_string(),
+                },
+                value: Expression::Bool(false),
+            }),
+        ];
+
+        test_parsing_statements(input, 0, expected_statements)
     }
 
     fn build_infix_expr_statement(token: Token, left: Expression, right: Expression) -> Statement {

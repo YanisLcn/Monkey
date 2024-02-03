@@ -125,6 +125,7 @@ impl InfixExpr {
 pub enum Expression {
     Identifier(Identifier),
     Integer(i32),
+    Bool(bool),
     Prefix(PrefixExpr),
     Infix(InfixExpr),
 }
@@ -146,6 +147,7 @@ impl Display for Expression {
                 "({} {} {})",
                 infix.left_expr, infix.operator, infix.right_expr
             ),
+            Expression::Bool(bool) => write!(f, "{}", bool),
         }
     }
 }
