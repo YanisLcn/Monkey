@@ -110,46 +110,6 @@ return 838383;
     }
 
     #[test]
-    fn test_parsing_prefix_expression() {
-        let input = "!5; -15;";
-
-        let expected_statements = vec![
-            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
-                Token::BANG,
-                Expression::Integer(5),
-            ))),
-            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
-                Token::SUB,
-                Expression::Integer(15),
-            ))),
-        ];
-
-        test_parsing_statements(input, 0, expected_statements);
-    }
-
-    #[test]
-    fn test_parsing_infix_expression() {
-        let input = "1 + 3; 3 - 4; 12 * 12; 1 / 2; 6 > 5; 6 < 5; 1 == 2; 0 != 0;";
-
-        let expected_statements = vec![
-            build_infix_expr_statement(Token::PLUS, Expression::Integer(1), Expression::Integer(3)),
-            build_infix_expr_statement(Token::SUB, Expression::Integer(3), Expression::Integer(4)),
-            build_infix_expr_statement(
-                Token::MUL,
-                Expression::Integer(12),
-                Expression::Integer(12),
-            ),
-            build_infix_expr_statement(Token::DIV, Expression::Integer(1), Expression::Integer(2)),
-            build_infix_expr_statement(Token::GT, Expression::Integer(6), Expression::Integer(5)),
-            build_infix_expr_statement(Token::LT, Expression::Integer(6), Expression::Integer(5)),
-            build_infix_expr_statement(Token::EQ, Expression::Integer(1), Expression::Integer(2)),
-            build_infix_expr_statement(Token::NE, Expression::Integer(0), Expression::Integer(0)),
-        ];
-
-        test_parsing_statements(input, 0, expected_statements);
-    }
-
-    #[test]
     fn test_bool() {
         let input = "true; false; let foobar = true; let barfoo = false;";
 
@@ -171,6 +131,53 @@ return 838383;
         ];
 
         test_parsing_statements(input, 0, expected_statements)
+    }
+
+    #[test]
+    fn test_parsing_prefix_expression() {
+        let input = "!5; -15; !false";
+
+        let expected_statements = vec![
+            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
+                Token::BANG,
+                Expression::Integer(5),
+            ))),
+            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
+                Token::SUB,
+                Expression::Integer(15),
+            ))),
+            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
+                Token::BANG,
+                Expression::Bool(false),
+            ))),
+        ];
+
+        test_parsing_statements(input, 0, expected_statements);
+    }
+
+    #[test]
+    fn test_parsing_infix_expression() {
+        let input = "1 + 3; 3 - 4; 12 * 12; 1 / 2; 6 > 5; 6 < 5; 1 == 2; 0 != 0; true == true; true != false; false == false;";
+
+        let expected_statements = vec![
+            build_infix_expr_statement(Token::PLUS, Expression::Integer(1), Expression::Integer(3)),
+            build_infix_expr_statement(Token::SUB, Expression::Integer(3), Expression::Integer(4)),
+            build_infix_expr_statement(
+                Token::MUL,
+                Expression::Integer(12),
+                Expression::Integer(12),
+            ),
+            build_infix_expr_statement(Token::DIV, Expression::Integer(1), Expression::Integer(2)),
+            build_infix_expr_statement(Token::GT, Expression::Integer(6), Expression::Integer(5)),
+            build_infix_expr_statement(Token::LT, Expression::Integer(6), Expression::Integer(5)),
+            build_infix_expr_statement(Token::EQ, Expression::Integer(1), Expression::Integer(2)),
+            build_infix_expr_statement(Token::NE, Expression::Integer(0), Expression::Integer(0)),
+            build_infix_expr_statement(Token::EQ, Expression::Bool(true), Expression::Bool(true)),
+            build_infix_expr_statement(Token::NE, Expression::Bool(true), Expression::Bool(false)),
+            build_infix_expr_statement(Token::EQ, Expression::Bool(false), Expression::Bool(false)),
+        ];
+
+        test_parsing_statements(input, 0, expected_statements);
     }
 
     #[test]
