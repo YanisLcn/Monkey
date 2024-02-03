@@ -23,25 +23,19 @@ let foobar = 838383;
                 name: Identifier {
                     value: "x".to_string(),
                 },
-                value: Expression::Identifier(Identifier {
-                    value: "5".to_string(),
-                }),
+                value: Expression::Integer(5),
             }),
             Statement::LetStatement(LetStatement {
                 name: Identifier {
                     value: "y".to_string(),
                 },
-                value: Expression::Identifier(Identifier {
-                    value: "10".to_string(),
-                }),
+                value: Expression::Integer(10),
             }),
             Statement::LetStatement(LetStatement {
                 name: Identifier {
                     value: "foobar".to_string(),
                 },
-                value: Expression::Identifier(Identifier {
-                    value: "838383".to_string(),
-                }),
+                value: Expression::Integer(838383),
             }),
         ];
 
@@ -74,19 +68,13 @@ return 838383;
 ";
         let expected_statements = vec![
             Statement::ReturnStatement(ReturnStatement {
-                value: Expression::Identifier(Identifier {
-                    value: "5".to_string(),
-                }),
+                value: Expression::Integer(5),
             }),
             Statement::ReturnStatement(ReturnStatement {
-                value: Expression::Identifier(Identifier {
-                    value: "10".to_string(),
-                }),
+                value: Expression::Integer(10),
             }),
             Statement::ReturnStatement(ReturnStatement {
-                value: Expression::Identifier(Identifier {
-                    value: "838383".to_string(),
-                }),
+                value: Expression::Integer(838383),
             }),
         ];
         test_parsing_statements(input, 0, expected_statements)
@@ -223,9 +211,9 @@ return 838383;
         assert_eq!(parser.errors().len(), errors);
         assert_eq!(program.statements.len(), expected_statements.len());
 
-        zip(expected_statements, program.statements)
+        zip(program.statements, expected_statements)
             .into_iter()
-            .for_each(|(expect_stmt, stmt)| {
+            .for_each(|(stmt, expect_stmt)| {
                 assert_eq!(stmt, expect_stmt);
             });
     }
