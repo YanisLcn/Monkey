@@ -150,31 +150,6 @@ return 838383;
     }
 
     #[test]
-    fn test_parsing_operator_precedence_display() {
-        let input_expect = vec![
-            ("-a * b", "((-a) * b);"),
-            ("!-a", "(!(-a));"),
-            ("a + b + c", "((a + b) + c);"),
-            ("a + b - c", "((a + b) - c);"),
-            ("a * b * c", "((a * b) * c);"),
-            ("a * b / c", "((a * b) / c);"),
-            ("a + b / c", "(a + (b / c));"),
-            ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f);"),
-            ("3 + 4; -5 * 5", "(3 + 4);((-5) * 5);"),
-            ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4));"),
-            ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4));"),
-            (
-                "3 + 4 * 5 == 3 * 1 + 4 * 5",
-                "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)));",
-            ),
-        ];
-
-        input_expect
-            .iter()
-            .for_each(|(i, e)| test_parsing_display_format(i, e));
-    }
-
-    #[test]
     fn test_bool() {
         let input = "true; false; let foobar = true; let barfoo = false;";
 
@@ -196,6 +171,33 @@ return 838383;
         ];
 
         test_parsing_statements(input, 0, expected_statements)
+    }
+
+    #[test]
+    fn test_parsing_operator_precedence_display() {
+        let input_expect = vec![
+            ("-a * b", "((-a) * b);"),
+            ("!-a", "(!(-a));"),
+            ("a + b + c", "((a + b) + c);"),
+            ("a + b - c", "((a + b) - c);"),
+            ("a * b * c", "((a * b) * c);"),
+            ("a * b / c", "((a * b) / c);"),
+            ("a + b / c", "(a + (b / c));"),
+            ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f);"),
+            ("3 + 4; -5 * 5", "(3 + 4);((-5) * 5);"),
+            ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4));"),
+            ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4));"),
+            (
+                "3 + 4 * 5 == 3 * 1 + 4 * 5",
+                "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)));",
+            ),
+            ("3 > 5 == false", "((3 > 5) == false);"),
+            ("true == 3 < 5", "(true == (3 < 5));"),
+        ];
+
+        input_expect
+            .iter()
+            .for_each(|(i, e)| test_parsing_display_format(i, e));
     }
 
     fn build_infix_expr_statement(token: Token, left: Expression, right: Expression) -> Statement {
