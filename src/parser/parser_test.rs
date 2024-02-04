@@ -4,7 +4,8 @@ pub mod parser_test {
 
     use crate::{
         ast::ast::{
-            Expression, Identifier, InfixExpr, LetStatement, PrefixExpr, ReturnStatement, Statement,
+            Expression, Identifier, IfExpression, InfixExpr, LetStatement, PrefixExpr,
+            ReturnStatement, Statement,
         },
         lexer::lexer::Lexer,
         parser::parser::Parser,
@@ -138,21 +139,31 @@ return 838383;
         let input = "!5; -15; !false";
 
         let expected_statements = vec![
-            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
-                Token::BANG,
-                Expression::Integer(5),
-            ))),
-            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
-                Token::SUB,
-                Expression::Integer(15),
-            ))),
-            Statement::ExpressionStatement(Expression::Prefix(PrefixExpr::new(
-                Token::BANG,
-                Expression::Bool(false),
-            ))),
-        ];
+            Expression::Prefix(PrefixExpr::new(Token::BANG, Expression::Integer(5))),
+            Expression::Prefix(PrefixExpr::new(Token::SUB, Expression::Integer(15))),
+            Expression::Prefix(PrefixExpr::new(Token::BANG, Expression::Bool(false))),
+        ]
+        .iter()
+        .map(|expr| build_stmt_from_expr(expr.clone()))
+        .collect();
 
         test_parsing_statements(input, 0, expected_statements);
+    }
+
+    fn build_int_int_infix(token: Token, a: i32, b: i32) -> Expression {
+        build_infix_expr(token, Expression::Integer(a), Expression::Integer(b))
+    }
+
+    fn build_ident_ident_infix(token: Token, a: &str, b: &str) -> Expression {
+        build_infix_expr(token, build_ident_expr(a), build_ident_expr(b))
+    }
+
+    fn build_bool_bool_infix(token: Token, a: bool, b: bool) -> Expression {
+        build_infix_expr(token, Expression::Bool(a), Expression::Bool(b))
+    }
+
+    fn build_stmt_from_expr(expr: Expression) -> Statement {
+        Statement::ExpressionStatement(expr)
     }
 
     #[test]
@@ -160,24 +171,48 @@ return 838383;
         let input = "1 + 3; 3 - 4; 12 * 12; 1 / 2; 6 > 5; 6 < 5; 1 == 2; 0 != 0; true == true; true != false; false == false;";
 
         let expected_statements = vec![
-            build_infix_expr_statement(Token::PLUS, Expression::Integer(1), Expression::Integer(3)),
-            build_infix_expr_statement(Token::SUB, Expression::Integer(3), Expression::Integer(4)),
-            build_infix_expr_statement(
-                Token::MUL,
-                Expression::Integer(12),
-                Expression::Integer(12),
-            ),
-            build_infix_expr_statement(Token::DIV, Expression::Integer(1), Expression::Integer(2)),
-            build_infix_expr_statement(Token::GT, Expression::Integer(6), Expression::Integer(5)),
-            build_infix_expr_statement(Token::LT, Expression::Integer(6), Expression::Integer(5)),
-            build_infix_expr_statement(Token::EQ, Expression::Integer(1), Expression::Integer(2)),
-            build_infix_expr_statement(Token::NE, Expression::Integer(0), Expression::Integer(0)),
-            build_infix_expr_statement(Token::EQ, Expression::Bool(true), Expression::Bool(true)),
-            build_infix_expr_statement(Token::NE, Expression::Bool(true), Expression::Bool(false)),
-            build_infix_expr_statement(Token::EQ, Expression::Bool(false), Expression::Bool(false)),
-        ];
+            build_int_int_infix(Token::PLUS, 1, 3),
+            build_int_int_infix(Token::SUB, 3, 4),
+            build_int_int_infix(Token::MUL, 12, 12),
+            build_int_int_infix(Token::DIV, 1, 2),
+            build_int_int_infix(Token::GT, 6, 5),
+            build_int_int_infix(Token::LT, 6, 5),
+            build_int_int_infix(Token::EQ, 1, 2),
+            build_int_int_infix(Token::NE, 0, 0),
+            build_bool_bool_infix(Token::EQ, true, true),
+            build_bool_bool_infix(Token::NE, true, false),
+            build_bool_bool_infix(Token::EQ, false, false),
+        ]
+        .iter()
+        .map(|expr| build_stmt_from_expr(expr.clone()))
+        .collect();
 
         test_parsing_statements(input, 0, expected_statements);
+    }
+
+    #[test]
+    fn test_if_expression() {
+        let input = "if (x < y) { x }";
+
+        let expected_statements = vec![build_stmt_from_expr(build_if_expr(
+            build_ident_ident_infix(Token::LT, "x", "y"),
+            vec![build_stmt_from_expr(build_ident_expr("x"))],
+            None,
+        ))];
+
+        test_parsing_statements(input, 0, expected_statements)
+    }
+    #[test]
+    fn test_if_else_expression() {
+        let input = "if (x < y) { x } else { y }";
+
+        let expected_statements = vec![build_stmt_from_expr(build_if_expr(
+            build_ident_ident_infix(Token::LT, "x", "y"),
+            vec![build_stmt_from_expr(build_ident_expr("x"))],
+            Some(vec![build_stmt_from_expr(build_ident_expr("y"))]),
+        ))];
+
+        test_parsing_statements(input, 0, expected_statements)
     }
 
     #[test]
@@ -202,9 +237,9 @@ return 838383;
             ("true == 3 < 5", "(true == (3 < 5));"),
             ("1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4);"),
             ("(5 + 5) * 2", "((5 + 5) * 2);"),
-            ("2 / (5 + 5)","(2 / (5 + 5));"),
-            ("-(5 + 5)","(-(5 + 5));"),
-            ("!(true == true)","(!(true == true));"),
+            ("2 / (5 + 5)", "(2 / (5 + 5));"),
+            ("-(5 + 5)", "(-(5 + 5));"),
+            ("!(true == true)", "(!(true == true));"),
         ];
 
         input_expect
@@ -212,8 +247,26 @@ return 838383;
             .for_each(|(i, e)| test_parsing_display_format(i, e));
     }
 
-    fn build_infix_expr_statement(token: Token, left: Expression, right: Expression) -> Statement {
-        Statement::ExpressionStatement(Expression::Infix(InfixExpr::new(token, left, right)))
+    fn build_ident_expr(name: &str) -> Expression {
+        Expression::Identifier(Identifier {
+            value: name.to_string(),
+        })
+    }
+
+    fn build_infix_expr(token: Token, left: Expression, right: Expression) -> Expression {
+        Expression::Infix(InfixExpr::new(token, left, right))
+    }
+
+    fn build_if_expr(
+        condition: Expression,
+        consequence: Vec<Statement>,
+        alternative: Option<Vec<Statement>>,
+    ) -> Expression {
+        Expression::IfExpression(IfExpression {
+            condition: Box::new(condition),
+            consequence,
+            alternative,
+        })
     }
 
     fn test_parsing_statements(input: &str, errors: usize, expected_statements: Vec<Statement>) {
