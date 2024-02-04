@@ -29,7 +29,7 @@ impl Display for Program {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct LetStatement {
     pub name: Identifier,
     pub value: Expression,
@@ -43,7 +43,7 @@ impl LetStatement {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ReturnStatement {
     pub value: Expression,
 }
@@ -54,7 +54,7 @@ impl ReturnStatement {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Statement {
     LetStatement(LetStatement),
     ReturnStatement(ReturnStatement),
@@ -116,6 +116,33 @@ impl InfixExpr {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub struct IfExpression {
+    pub condition: Box<Expression>,
+    pub consequence: Vec<Statement>,
+    pub alternative: Option<Vec<Statement>>,
+}
+
+impl Clone for IfExpression {
+    fn clone(&self) -> Self {
+        let consequence = self.consequence.iter().map(|stmt| stmt.clone()).collect();
+        let alternative = if let Some(alt) = &self.alternative {
+            Some(
+                alt.iter()
+                    .map(|stmt| stmt.clone())
+                    .collect::<Vec<Statement>>(),
+            )
+        } else {
+            None
+        };
+        IfExpression {
+            condition: self.condition.clone(),
+            consequence,
+            alternative,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     Identifier(Identifier),
@@ -123,6 +150,7 @@ pub enum Expression {
     Bool(bool),
     Prefix(PrefixExpr),
     Infix(InfixExpr),
+    IfExpression(IfExpression),
 }
 
 impl Expression {
@@ -143,6 +171,23 @@ impl Display for Expression {
                 infix.left_expr, infix.operator, infix.right_expr
             ),
             Expression::Bool(bool) => write!(f, "{}", bool),
+            Expression::IfExpression(ifexpr) => {
+                write!(f, "if {} {{ ", ifexpr.condition)?;
+                for stmt in ifexpr.consequence.iter() {
+                    write!(f, "{}", stmt)?
+                }
+                write!(f, " }}")?;
+
+                if let Some(statements) = &ifexpr.alternative {
+                    write!(f, " else {{ ")?;
+                    for stmt in statements.iter() {
+                        write!(f, "{}", stmt)?
+                    }
+                    write!(f, " }}")?;
+                };
+
+                Ok(())
+            }
         }
     }
 }
