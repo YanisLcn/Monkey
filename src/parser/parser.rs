@@ -1,7 +1,7 @@
 use crate::{
     ast::ast::{
-        Expression, Identifier, InfixExpr, LetStatement, PrefixExpr, Program, ReturnStatement,
-        Statement,
+        Expression, Identifier, IfExpression, InfixExpr, LetStatement, PrefixExpr, Program,
+        ReturnStatement, Statement,
     },
     lexer::lexer::Lexer,
     token::token::Token,
@@ -197,6 +197,7 @@ impl Parser {
             Token::TRUE => self.parse_boolean(),
             Token::FALSE => self.parse_boolean(),
             Token::LPAREN => self.parse_grouped_expression(),
+            Token::IF => self.parse_if_expression(),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No prefix parse function found for {}.", t).to_string());
@@ -249,6 +250,59 @@ impl Parser {
         } else {
             None
         }
+    }
+
+    pub fn parse_if_expression(&mut self) -> Option<Expression> {
+        if !self.expect_token(Token::LPAREN) {
+            return None;
+        };
+
+        self.next_token();
+        let condition = self.parse_expression(Precedence::LOWEST)?;
+
+        if !self.expect_token(Token::RPAREN) {
+            return None;
+        };
+
+        if !self.expect_token(Token::LBRACE) {
+            return None;
+        };
+
+        let consequence = self.parse_block_statements();
+
+        let alternative = if self.peek_token_is(Token::ELSE) {
+            self.next_token();
+
+            if !self.expect_token(Token::LBRACE) {
+                None
+            } else {
+                Some(self.parse_block_statements())
+            }
+        } else {
+            None
+        };
+
+        return Some(Expression::IfExpression(IfExpression {
+            condition: Box::new(condition),
+            consequence,
+            alternative,
+        }));
+    }
+
+    pub fn parse_block_statements(&mut self) -> Vec<Statement> {
+        let mut block = vec![];
+
+        self.next_token();
+        while !self.current_token_is(Token::RBRACE) && !self.current_token_is(Token::EOF) {
+            let stmt = self.parse_statement();
+
+            match stmt {
+                Some(stmt) => block.push(stmt),
+                None => (),
+            }
+            self.next_token();
+        }
+        block
     }
 
     pub fn current_token_is(&self, token: Token) -> bool {
