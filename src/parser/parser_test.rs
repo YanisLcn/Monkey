@@ -2,8 +2,8 @@
 pub mod parser_test {
     use crate::{
         ast::ast::{
-            Expression, FnExpression, Identifier, IfExpression, InfixExpr, LetStatement,
-            PrefixExpr, ReturnStatement, Statement,
+            CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
+            LetStatement, PrefixExpr, ReturnStatement, Statement,
         },
         lexer::lexer::Lexer,
         parser::parser::Parser,
@@ -242,6 +242,24 @@ return 838383;
         check_function_parameters("fn () {}", 0, vec_str_to_ident(vec![]));
         check_function_parameters("fn (x) {}", 0, vec_str_to_ident(vec!["x"]));
         check_function_parameters("fn (x, y, z) {}", 0, vec_str_to_ident(vec!["x", "y", "z"]));
+    }
+
+    #[test]
+    fn test_call_expression() {
+        let input = "add(1, 2 + 3, 4 * 5);";
+
+        let expected = vec![build_stmt_from_expr(Expression::CallExpression(
+            CallExpression {
+                function: Box::new(build_ident_expr("add")),
+                arguments: vec![
+                    Expression::Integer(1),
+                    build_int_int_infix(Token::PLUS, 2, 3),
+                    build_int_int_infix(Token::MUL, 4, 5),
+                ],
+            },
+        ))];
+
+        test_parsing_statements(input, 0, expected);
     }
 
     #[test]
