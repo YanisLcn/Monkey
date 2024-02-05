@@ -143,6 +143,21 @@ impl Clone for IfExpression {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub struct FnExpression {
+    pub parameters: Vec<Identifier>,
+    pub body: Vec<Statement>,
+}
+
+impl Clone for FnExpression {
+    fn clone(&self) -> Self {
+        let parameters = self.parameters.iter().map(|par| par.clone()).collect();
+        let body = self.body.iter().map(|stmt| stmt.clone()).collect();
+
+        FnExpression { parameters, body }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     Identifier(Identifier),
@@ -151,6 +166,7 @@ pub enum Expression {
     Prefix(PrefixExpr),
     Infix(InfixExpr),
     IfExpression(IfExpression),
+    FnExpression(FnExpression),
 }
 
 impl Expression {
@@ -187,6 +203,21 @@ impl Display for Expression {
                 };
 
                 Ok(())
+            }
+            Expression::FnExpression(func) => {
+                let param = func
+                    .parameters
+                    .iter()
+                    .map(|par| format!("{:?}", par))
+                    .collect::<Vec<String>>()
+                    .join(", ");
+                let stmts = func
+                    .body
+                    .iter()
+                    .map(|stmt| format!("{:?}", stmt))
+                    .collect::<Vec<String>>()
+                    .join(" ");
+                write!(f, "fn ({}) {{ {} }}", param, stmts)
             }
         }
     }
