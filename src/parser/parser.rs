@@ -1,7 +1,7 @@
 use crate::{
     ast::ast::{
-        Expression, Identifier, IfExpression, InfixExpr, LetStatement, PrefixExpr, Program,
-        ReturnStatement, Statement,
+        Expression, FnExpression, Identifier, IfExpression, InfixExpr, LetStatement, PrefixExpr,
+        Program, ReturnStatement, Statement,
     },
     lexer::lexer::Lexer,
     token::token::Token,
@@ -198,6 +198,7 @@ impl Parser {
             Token::FALSE => self.parse_boolean(),
             Token::LPAREN => self.parse_grouped_expression(),
             Token::IF => self.parse_if_expression(),
+            Token::FUNCTION => self.parse_function_expression(),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No prefix parse function found for {}.", t).to_string());
@@ -287,6 +288,58 @@ impl Parser {
             consequence,
             alternative,
         }));
+    }
+
+    pub fn parse_function_expression(&mut self) -> Option<Expression> {
+        if !self.expect_token(Token::LPAREN) {
+            return None;
+        };
+
+        let params = self.parse_function_parameters();
+        let parameters;
+
+        match params {
+            Some(p) => {
+                parameters = p;
+            }
+            None => return None,
+        }
+
+        if !self.expect_token(Token::LBRACE) {
+            return None;
+        };
+
+        let body = self.parse_block_statements();
+
+        Some(Expression::FnExpression(FnExpression { parameters, body }))
+    }
+
+    pub fn parse_function_parameters(&mut self) -> Option<Vec<Identifier>> {
+        let mut parameters = vec![];
+
+        if self.peek_token_is(Token::RPAREN) {
+            self.next_token();
+            return Some(parameters);
+        };
+
+        self.next_token();
+        parameters.push(Identifier {
+            value: self.current_tok.to_string(),
+        });
+
+        while self.peek_token_is(Token::COMMA) {
+            self.next_token();
+            self.next_token();
+            parameters.push(Identifier {
+                value: self.current_tok.to_string(),
+            });
+        }
+
+        if !self.expect_token(Token::RPAREN) {
+            return None;
+        }
+
+        Some(parameters)
     }
 
     pub fn parse_block_statements(&mut self) -> Vec<Statement> {
