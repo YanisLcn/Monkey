@@ -158,6 +158,22 @@ impl Clone for FnExpression {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub struct CallExpression {
+    pub function: Box<Expression>,
+    pub arguments: Vec<Expression>,
+}
+
+impl Clone for CallExpression {
+    fn clone(&self) -> Self {
+        let arguments = self.arguments.iter().map(|arg| arg.clone()).collect();
+        CallExpression {
+            function: self.function.clone(),
+            arguments,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     Identifier(Identifier),
@@ -167,6 +183,7 @@ pub enum Expression {
     Infix(InfixExpr),
     IfExpression(IfExpression),
     FnExpression(FnExpression),
+    CallExpression(CallExpression),
 }
 
 impl Expression {
@@ -218,6 +235,15 @@ impl Display for Expression {
                     .collect::<Vec<String>>()
                     .join(" ");
                 write!(f, "fn ({}) {{ {} }}", param, stmts)
+            }
+            Expression::CallExpression(call) => {
+                let args = call
+                    .arguments
+                    .iter()
+                    .map(|arg| format!("{:?}", arg))
+                    .collect::<Vec<String>>()
+                    .join(", ");
+                write!(f, "{}({})", call.function, args)
             }
         }
     }
