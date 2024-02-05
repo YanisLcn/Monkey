@@ -4,8 +4,8 @@ pub mod parser_test {
 
     use crate::{
         ast::ast::{
-            Expression, Identifier, IfExpression, InfixExpr, LetStatement, PrefixExpr,
-            ReturnStatement, Statement,
+            Expression, FnExpression, Identifier, IfExpression, InfixExpr, LetStatement,
+            PrefixExpr, ReturnStatement, Statement,
         },
         lexer::lexer::Lexer,
         parser::parser::Parser,
@@ -216,6 +216,22 @@ return 838383;
     }
 
     #[test]
+    fn test_function_literals() {
+        let input = "fn(x, y) { x + y; }";
+
+        let expected_statements = vec![build_stmt_from_expr(build_fn_expr(
+            vec!["x", "y"],
+            vec![build_stmt_from_expr(build_infix_expr(
+                Token::PLUS,
+                build_ident_expr("x"),
+                build_ident_expr("y"),
+            ))],
+        ))];
+
+        test_parsing_statements(input, 0, expected_statements);
+    }
+
+    #[test]
     fn test_parsing_operator_precedence_display() {
         let input_expect = vec![
             ("-a * b", "((-a) * b);"),
@@ -266,6 +282,18 @@ return 838383;
             condition: Box::new(condition),
             consequence,
             alternative,
+        })
+    }
+
+    fn build_fn_expr(par: Vec<&str>, body: Vec<Statement>) -> Expression {
+        Expression::FnExpression(FnExpression {
+            parameters: par
+                .iter()
+                .map(|&s| Identifier {
+                    value: s.to_string(),
+                })
+                .collect::<Vec<Identifier>>(),
+            body,
         })
     }
 
