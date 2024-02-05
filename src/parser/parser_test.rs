@@ -1,7 +1,5 @@
 #[cfg(test)]
 pub mod parser_test {
-    use std::iter::zip;
-
     use crate::{
         ast::ast::{
             Expression, FnExpression, Identifier, IfExpression, InfixExpr, LetStatement,
@@ -231,6 +229,21 @@ return 838383;
         test_parsing_statements(input, 0, expected_statements);
     }
 
+    fn vec_str_to_ident(v: Vec<&str>) -> Vec<Identifier> {
+        v.iter()
+            .map(|x| Identifier {
+                value: x.to_string(),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn test_function_parameters() {
+        check_function_parameters("fn () {}", 0, vec_str_to_ident(vec![]));
+        check_function_parameters("fn (x) {}", 0, vec_str_to_ident(vec!["x"]));
+        check_function_parameters("fn (x, y, z) {}", 0, vec_str_to_ident(vec!["x", "y", "z"]));
+    }
+
     #[test]
     fn test_parsing_operator_precedence_display() {
         let input_expect = vec![
@@ -305,12 +318,23 @@ return 838383;
         check_parse_errors(&parser);
         assert_eq!(parser.errors().len(), errors);
         assert_eq!(program.statements.len(), expected_statements.len());
+        assert_eq!(program.statements, expected_statements);
+    }
 
-        zip(program.statements, expected_statements)
-            .into_iter()
-            .for_each(|(stmt, expect_stmt)| {
-                assert_eq!(stmt, expect_stmt);
-            });
+    fn check_function_parameters(input: &str, errors: usize, expected_parameters: Vec<Identifier>) {
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        check_parse_errors(&parser);
+        assert_eq!(parser.errors().len(), errors);
+        assert!(program.statements.len() > 0);
+
+        if let Statement::ExpressionStatement(Expression::FnExpression(func)) =
+            program.statements.first().unwrap()
+        {
+            assert_eq!(func.parameters, expected_parameters);
+        }
     }
 
     fn test_parsing_display_format(input: &str, expected_format: &str) {
