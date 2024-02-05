@@ -1,7 +1,7 @@
 use crate::{
     ast::ast::{
-        Expression, FnExpression, Identifier, IfExpression, InfixExpr, LetStatement, PrefixExpr,
-        Program, ReturnStatement, Statement,
+        CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
+        LetStatement, PrefixExpr, Program, ReturnStatement, Statement,
     },
     lexer::lexer::Lexer,
     token::token::Token,
@@ -35,6 +35,7 @@ fn token_to_precedence(token: Token) -> Precedence {
         Token::SUB => Precedence::SUM,
         Token::MUL => Precedence::PRODUCT,
         Token::DIV => Precedence::PRODUCT,
+        Token::LPAREN => Precedence::CALL,
         _ => Precedence::LOWEST,
     }
 }
@@ -233,6 +234,7 @@ impl Parser {
             Token::SUB => self.parse_infix_expression(expr),
             Token::MUL => self.parse_infix_expression(expr),
             Token::DIV => self.parse_infix_expression(expr),
+            Token::LPAREN => self.parse_call_expression(expr),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No infix parse function found for {}.", t).to_string());
@@ -356,6 +358,56 @@ impl Parser {
             self.next_token();
         }
         block
+    }
+
+    pub fn parse_call_expression(&mut self, expr: Expression) -> Option<Expression> {
+        match self.parse_call_arguments() {
+            Some(arguments) => Some(Expression::CallExpression(CallExpression {
+                function: Box::new(expr),
+                arguments,
+            })),
+            None => None,
+        }
+    }
+
+    pub fn parse_call_arguments(&mut self) -> Option<Vec<Expression>> {
+        let mut args = vec![];
+
+        if self.peek_token_is(Token::RPAREN) {
+            self.next_token();
+            return Some(args);
+        };
+
+        self.next_token();
+
+        match self.parse_expression(Precedence::LOWEST) {
+            Some(argument) => {
+                args.push(argument);
+            }
+            None => {
+                return None;
+            }
+        }
+
+        while self.peek_token_is(Token::COMMA) {
+            self.next_token();
+            self.next_token();
+
+            match self.parse_expression(Precedence::LOWEST) {
+                Some(argument) => {
+                    args.push(argument);
+                }
+                None => {
+                    return None;
+                }
+            }
+        }
+
+        if !self.expect_token(Token::RPAREN) {
+            return None;
+        }
+
+        Some(args)
     }
 
     pub fn current_token_is(&self, token: Token) -> bool {
