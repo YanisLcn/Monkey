@@ -231,7 +231,7 @@ impl Display for Expression {
                 let stmts = func
                     .body
                     .iter()
-                    .map(|stmt| format!("{:?}", stmt))
+                    .map(|stmt| format!("{}", stmt))
                     .collect::<Vec<String>>()
                     .join(" ");
                 write!(f, "fn ({}) {{ {} }}", param, stmts)
@@ -240,7 +240,7 @@ impl Display for Expression {
                 let args = call
                     .arguments
                     .iter()
-                    .map(|arg| format!("{:?}", arg))
+                    .map(|arg| format!("{}", arg))
                     .collect::<Vec<String>>()
                     .join(", ");
                 write!(f, "{}({})", call.function, args)
