@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use monkey::{lexer::lexer::Lexer, token::token::Token};
+use monkey::{lexer::lexer::Lexer, parser::parser::Parser};
 
 const PROMPT: &str = "@ ";
 
@@ -16,16 +16,17 @@ fn main() {
         print!("{PROMPT}");
         let _ = stdout.flush();
         let _ = stdin.read_line(input);
-        print!("{}", input);
 
-        let mut lexer = Lexer::new(input.clone());
+        let lexer = Lexer::new(input.clone());
+        let mut parser = Parser::new(lexer);
 
-        let mut token = lexer.next_token();
-        while token != Token::EOF {
-            println!("{:?}", token);
-            token = lexer.next_token();
+        let program = parser.parse_program();
+
+        if parser.errors().len() != 0 {
+            parser.errors().iter().for_each(|err| println!("{err}"));
+            continue;
         }
 
-        println!();
+        println!("{}", program);
     }
 }
