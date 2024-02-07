@@ -102,7 +102,7 @@ impl Parser {
         };
 
         //TODO!: "We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::SEMICOLON) {
+        while !self.current_token_is(Token::SEMICOLON) && !self.current_token_is(Token::EOF) {
             self.next_token();
         }
 
@@ -120,7 +120,7 @@ impl Parser {
         };
 
         //TODO!: "We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::SEMICOLON) {
+        while !self.current_token_is(Token::SEMICOLON) && !self.current_token_is(Token::EOF) {
             self.next_token();
         }
 
