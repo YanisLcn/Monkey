@@ -116,62 +116,23 @@ impl InfixExpr {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct IfExpression {
     pub condition: Box<Expression>,
     pub consequence: Vec<Statement>,
     pub alternative: Option<Vec<Statement>>,
 }
 
-impl Clone for IfExpression {
-    fn clone(&self) -> Self {
-        let consequence = self.consequence.iter().map(|stmt| stmt.clone()).collect();
-        let alternative = if let Some(alt) = &self.alternative {
-            Some(
-                alt.iter()
-                    .map(|stmt| stmt.clone())
-                    .collect::<Vec<Statement>>(),
-            )
-        } else {
-            None
-        };
-        IfExpression {
-            condition: self.condition.clone(),
-            consequence,
-            alternative,
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct FnExpression {
     pub parameters: Vec<Identifier>,
     pub body: Vec<Statement>,
 }
 
-impl Clone for FnExpression {
-    fn clone(&self) -> Self {
-        let parameters = self.parameters.iter().map(|par| par.clone()).collect();
-        let body = self.body.iter().map(|stmt| stmt.clone()).collect();
-
-        FnExpression { parameters, body }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct CallExpression {
     pub function: Box<Expression>,
     pub arguments: Vec<Expression>,
-}
-
-impl Clone for CallExpression {
-    fn clone(&self) -> Self {
-        let arguments = self.arguments.iter().map(|arg| arg.clone()).collect();
-        CallExpression {
-            function: self.function.clone(),
-            arguments,
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
