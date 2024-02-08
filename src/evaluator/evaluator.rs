@@ -27,7 +27,7 @@ fn eval_expression(node: Expression) -> Object {
     match node {
         Identifier(_) => todo!(),
         Integer(i) => Object::INTEGER(i),
-        Bool(_) => todo!(),
+        Bool(b) => Object::BOOLEAN(b),
         Prefix(_) => todo!(),
         Infix(_) => todo!(),
         IfExpression(_) => todo!(),

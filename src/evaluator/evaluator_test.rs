@@ -15,6 +15,10 @@ pub mod evaluator_test {
         assert_eq!(obj, Object::INTEGER(expected_value));
     }
 
+    fn eval_boolean_object(obj: Object, expected_value: bool) {
+        assert_eq!(obj, Object::BOOLEAN(expected_value));
+    }
+
     #[test]
     fn eval_integer_expression() {
         let input_exptcdvalue = vec![("5", 5), ("10", 10)];
@@ -22,5 +26,14 @@ pub mod evaluator_test {
         input_exptcdvalue
             .iter()
             .for_each(|(i, v)| eval_integer_object(test_eval(i), *v));
+    }
+
+    #[test]
+    fn eval_boolean_expression() {
+        let input_exptcdvalue = vec![("false", false), ("true", true)];
+
+        input_exptcdvalue
+            .iter()
+            .for_each(|(i, v)| eval_boolean_object(test_eval(i), *v));
     }
 }
