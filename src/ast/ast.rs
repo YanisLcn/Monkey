@@ -78,6 +78,12 @@ pub struct Identifier {
     pub value: String,
 }
 
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
 impl Identifier {
     pub fn new(value: String) -> Self {
         Identifier { value }
@@ -186,7 +192,7 @@ impl Display for Expression {
                 let param = func
                     .parameters
                     .iter()
-                    .map(|par| format!("{:?}", par))
+                    .map(|par| format!("{}", par))
                     .collect::<Vec<String>>()
                     .join(", ");
                 let stmts = func
