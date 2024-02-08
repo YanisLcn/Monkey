@@ -29,13 +29,13 @@ impl Display for Program {
     }
 }
 
+/** STATEMENTS */
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct LetStatement {
     pub name: Identifier,
     pub value: Expression,
 }
-
-/** STATEMENTS */
 
 impl LetStatement {
     pub(crate) fn new(name: Identifier, value: Expression) -> Self {
