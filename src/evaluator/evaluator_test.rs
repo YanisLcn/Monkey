@@ -36,4 +36,22 @@ pub mod evaluator_test {
             .iter()
             .for_each(|(i, v)| eval_boolean_object(test_eval(i), *v));
     }
+
+    #[test]
+    fn eval_bang_operator() {
+        let input_exptcdvalue = vec![
+            ("!true", false),
+            ("!false", true),
+            ("!5", false),
+            ("!0", true),
+            ("!!true", true),
+            ("!!false", false),
+            ("!!5", true),
+            ("!!0", false),
+        ];
+
+        input_exptcdvalue
+            .iter()
+            .for_each(|(i, v)| eval_boolean_object(test_eval(i), *v));
+    }
 }
