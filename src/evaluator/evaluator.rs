@@ -48,6 +48,7 @@ fn eval_expression(node: Expression) -> Object {
 fn eval_prefix_expression(operator: Token, object: Object) -> Object {
     match operator {
         Token::BANG => eval_bang_expression(object),
+        Token::SUB => eval_minus_expression(object),
         _ => todo!(),
     }
 }
@@ -57,6 +58,13 @@ fn eval_bang_expression(object: Object) -> Object {
         TRUE => FALSE,
         FALSE | Object::NULL | Object::INTEGER(0) => TRUE,
         _ => FALSE,
+    }
+}
+
+fn eval_minus_expression(object: Object) -> Object {
+    match object {
+        Object::INTEGER(i) => Object::INTEGER(-i),
+        _ => return NULL,
     }
 }
 

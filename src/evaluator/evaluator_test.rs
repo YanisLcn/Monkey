@@ -21,7 +21,14 @@ pub mod evaluator_test {
 
     #[test]
     fn eval_integer_expression() {
-        let input_exptcdvalue = vec![("5", 5), ("10", 10)];
+        let input_exptcdvalue = vec![
+            ("5", 5),
+            ("10", 10),
+            ("-5", -5),
+            ("-10", -10),
+            ("0", 0),
+            ("-0", 0),
+        ];
 
         input_exptcdvalue
             .iter()
