@@ -38,7 +38,7 @@ fn eval_expression(node: Expression) -> Object {
         Integer(i) => Object::INTEGER(i),
         Bool(b) => native_bool_to_object(b),
         Prefix(p) => eval_prefix_expression(p.operator, eval_expression(*p.expr)),
-        Infix(_) => todo!(),
+        Infix(i) => eval_infix_expression(i.operator, eval_expression(*i.left_expr), eval_expression(*i.right_expr)),
         IfExpression(_) => todo!(),
         FnExpression(_) => todo!(),
         CallExpression(_) => todo!(),
@@ -51,6 +51,23 @@ fn eval_prefix_expression(operator: Token, object: Object) -> Object {
         Token::SUB => eval_minus_expression(object),
         _ => todo!(),
     }
+}
+
+fn eval_infix_expression(operator: Token, object_left: Object, object_right: Object) -> Object {
+    match (object_left, object_right) {
+        (Object::INTEGER(a), Object::INTEGER(b)) => eval_integer_infix_expression(operator, a, b),
+        _ => NULL,
+    }
+}
+
+fn eval_integer_infix_expression(operator: Token, a: i32, b: i32) -> Object {
+    match operator {
+            Token::PLUS => Object::INTEGER(a + b),
+            Token::SUB => Object::INTEGER(a - b),
+            Token::MUL => Object::INTEGER(a * b),
+            Token::DIV => Object::INTEGER(a / b),
+            _ => NULL,
+        }
 }
 
 fn eval_bang_expression(object: Object) -> Object {
