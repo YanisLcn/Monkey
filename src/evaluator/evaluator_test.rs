@@ -48,7 +48,27 @@ pub mod evaluator_test {
 
     #[test]
     fn eval_boolean_expression() {
-        let input_exptcdvalue = vec![("false", false), ("true", true)];
+        let input_exptcdvalue = vec![
+            ("false", false),
+            ("true", true),
+            ("1 < 2", true),
+            ("1 > 2", false),
+            ("1 < 1", false),
+            ("1 > 1", false),
+            ("1 == 1", true),
+            ("1 != 1", false),
+            ("1 == 2", false),
+            ("1 != 2", true),
+            ("true == true", true),
+            ("false == false", true),
+            ("true == false", false),
+            ("true != false", true),
+            ("false != true", true),
+            ("(1 < 2) == true", true),
+            ("(1 < 2) == false", false),
+            ("(1 > 2) == true", false),
+            ("(1 > 2) == false", true),
+        ];
 
         input_exptcdvalue
             .iter()

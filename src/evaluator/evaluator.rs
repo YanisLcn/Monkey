@@ -56,6 +56,15 @@ fn eval_prefix_expression(operator: Token, object: Object) -> Object {
 fn eval_infix_expression(operator: Token, object_left: Object, object_right: Object) -> Object {
     match (object_left, object_right) {
         (Object::INTEGER(a), Object::INTEGER(b)) => eval_integer_infix_expression(operator, a, b),
+        (Object::BOOLEAN(a), Object::BOOLEAN(b)) => eval_boolean_infix_expression(operator, a, b),
+        _ => NULL,
+    }
+}
+
+fn eval_boolean_infix_expression(operator: Token, a: bool, b: bool) -> Object {
+    match operator {
+        Token::EQ => Object::BOOLEAN(a == b),
+        Token::NE => Object::BOOLEAN(a != b),
         _ => NULL,
     }
 }
@@ -66,6 +75,10 @@ fn eval_integer_infix_expression(operator: Token, a: i32, b: i32) -> Object {
             Token::SUB => Object::INTEGER(a - b),
             Token::MUL => Object::INTEGER(a * b),
             Token::DIV => Object::INTEGER(a / b),
+            Token::EQ => native_bool_to_object(a == b),
+            Token::NE => native_bool_to_object(a != b),
+            Token::GT => native_bool_to_object(a > b),
+            Token::LT => native_bool_to_object(a < b),
             _ => NULL,
         }
 }
