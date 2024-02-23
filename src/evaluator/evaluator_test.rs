@@ -21,7 +21,7 @@ pub mod evaluator_test {
 
     #[test]
     fn eval_integer_expression() {
-        let input_exptcdvalue = vec![
+        let input_expctdvalue = vec![
             ("5", 5),
             ("10", 10),
             ("-5", -5),
@@ -41,14 +41,14 @@ pub mod evaluator_test {
             ("(5 + 10 * 2 + 15 / 3) * 2 + -10", 50),
         ];
 
-        input_exptcdvalue
+        input_expctdvalue
             .iter()
             .for_each(|(i, v)| eval_integer_object(test_eval(i), *v));
     }
 
     #[test]
     fn eval_boolean_expression() {
-        let input_exptcdvalue = vec![
+        let input_expctdvalue = vec![
             ("false", false),
             ("true", true),
             ("1 < 2", true),
@@ -70,14 +70,14 @@ pub mod evaluator_test {
             ("(1 > 2) == false", true),
         ];
 
-        input_exptcdvalue
+        input_expctdvalue
             .iter()
             .for_each(|(i, v)| eval_boolean_object(test_eval(i), *v));
     }
 
     #[test]
     fn eval_bang_operator() {
-        let input_exptcdvalue = vec![
+        let input_expctdvalue = vec![
             ("!true", false),
             ("!false", true),
             ("!5", false),
@@ -88,8 +88,25 @@ pub mod evaluator_test {
             ("!!0", false),
         ];
 
-        input_exptcdvalue
+        input_expctdvalue
             .iter()
             .for_each(|(i, v)| eval_boolean_object(test_eval(i), *v));
+    }
+
+    #[test]
+    fn eval_if_expression() {
+        let input_expctdvalue = vec![
+            ("if (true) { 10 }", Object::INTEGER(10)),
+            ("if (false) { 10 }", Object::NULL),
+            ("if (1) { 10 }", Object::INTEGER(10)),
+            ("if (1 < 2) { 10 }", Object::INTEGER(10)),
+            ("if (1 > 2) { 10 }", Object::NULL),
+            ("if (1 > 2) { 10 } else { 20 }", Object::INTEGER(20)),
+            ("if (1 < 2) { 10 } else { 20 }", Object::INTEGER(10)),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| assert_eq!(test_eval(i), *v));
     }
 }
