@@ -17,17 +17,25 @@ pub fn eval(node: Program) -> Object {
 }
 
 fn eval_statement_vec(nodes: Vec<Statement>) -> Object {
-    match nodes.iter().map(|stmt| eval_statement(stmt.clone())).last() {
-        Some(obj) => obj,
-        None => NULL,
+    let mut last = NULL;
+    for stmt in nodes.iter() {
+        let evaluated = eval_statement(stmt.clone());
+        if let Object::RETURN(r) = evaluated {
+            return *r;
+        };
+        last = evaluated;
     }
+    last
 }
 
 fn eval_statement(node: Statement) -> Object {
     match node {
         LetStatement(_) => todo!(),
-        ReturnStatement(_) => todo!(),
-        ExpressionStatement(expression) => eval_expression(expression),
+        ReturnStatement(return_statement) => {
+            println!("yes");
+            Object::RETURN(Box::new(eval_expression(return_statement.value)))
+        }
+        ExpressionStatement(expression_statement) => eval_expression(expression_statement),
     }
 }
 

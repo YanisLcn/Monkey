@@ -109,4 +109,29 @@ pub mod evaluator_test {
             .iter()
             .for_each(|(i, v)| assert_eq!(test_eval(i), *v));
     }
+
+    #[test]
+    fn eval_return_statement() {
+        let input_expctdvalue = vec![
+            ("9; 8;", 8),
+            ("return 10;", 10),
+            ("return 10; 9;", 10),
+            ("return 2 * 5; 9;", 10),
+            ("9; return 2 * 5; 6;", 10),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .map(|(i, v)| (test_eval(i), v))
+            .map(|(i, v)| {
+                (
+                    match i {
+                        Object::RETURN(r) => *r,
+                        obj => obj,
+                    },
+                    v,
+                )
+            })
+            .for_each(|(i, v)| eval_integer_object(i, *v));
+    }
 }
