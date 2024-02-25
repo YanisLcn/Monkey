@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use monkey::{evaluator::evaluator::eval, lexer::lexer::Lexer, parser::parser::Parser};
+use monkey::{evaluator::evaluator::eval, lexer::lexer::Lexer, object::env::Environment, parser::parser::Parser};
 
 const PROMPT: &str = "@ ";
 
@@ -27,6 +27,6 @@ fn main() {
             continue;
         }
 
-        println!("{}", eval(program));
+        println!("{}", eval(program, Environment::new()));
     }
 }

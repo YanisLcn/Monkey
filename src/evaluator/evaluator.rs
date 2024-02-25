@@ -4,7 +4,7 @@ use crate::{
         IfExpression, Program,
         Statement::{self, *},
     },
-    object::object::Object,
+    object::{env::Environment, object::Object},
     token::token::Token,
 };
 
@@ -12,14 +12,14 @@ const TRUE: Object = Object::BOOLEAN(true);
 const FALSE: Object = Object::BOOLEAN(false);
 const NULL: Object = Object::NULL;
 
-pub fn eval(node: Program) -> Object {
-    eval_statement_vec(node.statements)
+pub fn eval(node: Program, env: Environment) -> Object {
+    eval_statement_vec(node.statements, &env)
 }
 
-fn eval_statement_vec(nodes: Vec<Statement>) -> Object {
+fn eval_statement_vec(nodes: Vec<Statement>, env: &Environment) -> Object {
     let mut last = NULL;
     for stmt in nodes.iter() {
-        let evaluated = eval_statement(stmt.clone());
+        let evaluated = eval_statement(stmt.clone(), env);
         match evaluated {
             Object::RETURN(r) => {
                 return *r;
@@ -34,39 +34,39 @@ fn eval_statement_vec(nodes: Vec<Statement>) -> Object {
     last
 }
 
-fn eval_statement(node: Statement) -> Object {
+fn eval_statement(node: Statement, env: &Environment) -> Object {
     match node {
         LetStatement(_) => todo!(),
         ReturnStatement(return_statement) => {
-            Object::RETURN(Box::new(eval_expression(return_statement.value)))
+            Object::RETURN(Box::new(eval_expression(return_statement.value, &env)))
         }
-        ExpressionStatement(expression_statement) => eval_expression(expression_statement),
+        ExpressionStatement(expression_statement) => eval_expression(expression_statement, &env),
     }
 }
 
-fn eval_expression(node: Expression) -> Object {
+fn eval_expression(node: Expression, env: &Environment) -> Object {
     match node {
         Identifier(_) => todo!(),
         Integer(i) => Object::INTEGER(i),
         Bool(b) => native_bool_to_object(b),
-        Prefix(p) => match eval_expression(*p.expr) {
+        Prefix(p) => match eval_expression(*p.expr, env) {
             Object::ERROR(e) => Object::ERROR(e),
             obj => eval_prefix_expression(p.operator, obj),
         },
         Infix(i) => {
-            let left_expr = eval_expression(*i.left_expr);
+            let left_expr = eval_expression(*i.left_expr, env);
             if let Object::ERROR(_) = left_expr {
                 return left_expr;
             };
 
-            let right_expr = eval_expression(*i.right_expr);
+            let right_expr = eval_expression(*i.right_expr, env);
             if let Object::ERROR(_) = right_expr {
                 return right_expr;
             };
 
             eval_infix_expression(i.operator, left_expr, right_expr)
         }
-        IfExpression(if_expr) => eval_if_expression(if_expr),
+        IfExpression(if_expr) => eval_if_expression(if_expr, env),
         FnExpression(_) => todo!(),
         CallExpression(_) => todo!(),
     }
@@ -125,13 +125,13 @@ fn eval_integer_infix_expression(operator: Token, a: i32, b: i32) -> Object {
     }
 }
 
-fn eval_if_expression(if_expr: IfExpression) -> Object {
-    let condition = eval_expression(*if_expr.condition);
+fn eval_if_expression(if_expr: IfExpression, env: &Environment) -> Object {
+    let condition = eval_expression(*if_expr.condition, env);
 
     if is_true(condition) == TRUE {
-        eval_statement_vec(if_expr.consequence)
+        eval_statement_vec(if_expr.consequence, env)
     } else if if_expr.alternative.is_some() {
-        eval_statement_vec(if_expr.alternative.unwrap())
+        eval_statement_vec(if_expr.alternative.unwrap(), env)
     } else {
         NULL
     }
