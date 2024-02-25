@@ -151,10 +151,25 @@ pub mod evaluator_test {
                 "if (10 > 1) { if (10 > 1) { return true + false; } return 1; }",
                 "unknown operator: BOOLEAN + BOOLEAN",
             ),
+            ("foobar", "identifier not found: foobar"),
         ];
 
         input_expctdvalue
             .iter()
             .for_each(|(i, v)| assert_eq!(test_eval(i), Object::ERROR(v.to_string())));
+    }
+
+    #[test]
+    fn eval_let_statement() {
+        let input_expctdvalue = vec![
+            ("let a = 5; a;", 5),
+            ("let a = 5 * 5; a;", 25),
+            ("let a = 5; let b = a; b;", 5),
+            ("let a = 5; let b = a; let c = a + b + 5; c;", 15),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| eval_integer_object(test_eval(i), *v))
     }
 }
