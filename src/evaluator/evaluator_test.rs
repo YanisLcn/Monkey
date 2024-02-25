@@ -134,4 +134,27 @@ pub mod evaluator_test {
             })
             .for_each(|(i, v)| eval_integer_object(i, *v));
     }
+
+    #[test]
+    fn eval_error_handling() {
+        let input_expctdvalue = vec![
+            ("5 + true;", "type mismatch: INTEGER + BOOLEAN"),
+            ("5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"),
+            ("-true", "unknown operator: -BOOLEAN"),
+            ("true + false;", "unknown operator: BOOLEAN + BOOLEAN"),
+            ("5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"),
+            (
+                "if (10 > 1) { true + false; }",
+                "unknown operator: BOOLEAN + BOOLEAN",
+            ),
+            (
+                "if (10 > 1) { if (10 > 1) { return true + false; } return 1; }",
+                "unknown operator: BOOLEAN + BOOLEAN",
+            ),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| assert_eq!(test_eval(i), Object::ERROR(v.to_string())));
+    }
 }
