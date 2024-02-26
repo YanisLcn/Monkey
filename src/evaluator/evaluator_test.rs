@@ -1,14 +1,16 @@
 #[cfg(test)]
 pub mod evaluator_test {
     use crate::{
-        evaluator::evaluator::eval, lexer::lexer::Lexer, object::{env::Environment, object::Object},
+        evaluator::evaluator::eval,
+        lexer::lexer::Lexer,
+        object::{env::Environment, object::Object},
         parser::parser::Parser,
     };
 
     fn test_eval(input: &str) -> Object {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
-        eval(parser.parse_program(), Environment::new())
+        eval(parser.parse_program(), &Environment::new())
     }
 
     fn eval_integer_object(obj: Object, expected_value: i32) {

@@ -12,8 +12,8 @@ const TRUE: Object = Object::BOOLEAN(true);
 const FALSE: Object = Object::BOOLEAN(false);
 const NULL: Object = Object::NULL;
 
-pub fn eval(node: Program, env: Environment) -> Object {
-    eval_statement_vec(node.statements, &env)
+pub fn eval(node: Program, env: &Environment) -> Object {
+    eval_statement_vec(node.statements, env)
 }
 
 fn eval_statement_vec(nodes: Vec<Statement>, env: &Environment) -> Object {
