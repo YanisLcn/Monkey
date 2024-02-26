@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Object {
     INTEGER(i32),
     BOOLEAN(bool),

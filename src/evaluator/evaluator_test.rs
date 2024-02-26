@@ -10,7 +10,7 @@ pub mod evaluator_test {
     fn test_eval(input: &str) -> Object {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
-        eval(parser.parse_program(), &Environment::new())
+        eval(parser.parse_program(), &mut Environment::new())
     }
 
     fn eval_integer_object(obj: Object, expected_value: i32) {
