@@ -4,7 +4,7 @@ use crate::{
         Identifier, IfExpression, Program,
         Statement::{self, *},
     },
-    object::{self, env::Environment, object::Object},
+    object::{env::Environment, object::Object},
     token::token::Token,
 };
 

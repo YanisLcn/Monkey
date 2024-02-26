@@ -13,7 +13,7 @@ fn main() {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
     let input = &mut String::new();
-    let mut env = &mut Environment::new();
+    let env = &mut Environment::new();
 
     loop {
         input.clear();
