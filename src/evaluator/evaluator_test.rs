@@ -174,4 +174,65 @@ pub mod evaluator_test {
             .iter()
             .for_each(|(i, v)| eval_integer_object(test_eval(i), *v))
     }
+
+    #[test]
+    fn eval_let_function_expression() {
+        let input_expctdvalue = vec![
+            ("let identity = fn(x) { x; }; identity(5);", 5),
+            ("let identity = fn(x) { return x; }; identity(5);", 5),
+            ("let double = fn(x) { x * 2; }; double(5);", 10),
+            ("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
+            ("let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20),
+            ("fn(x) { x; }(5)", 5),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| eval_integer_object(test_eval(i), *v));
+    }
+
+    #[test]
+    fn eval_function_expression() {
+        let input_expctdvalues = vec![("fn(x) { x + 2; };", 1, vec!["x"], "(x + 2);")];
+
+        input_expctdvalues.iter().for_each(|(f, np, p, b)| {
+            assert!(eval_function_support(
+                test_eval(f),
+                *np,
+                p.iter().map(|s| s.to_string()).collect(),
+                b.to_string(),
+            )
+            .is_ok())
+        });
+    }
+
+    fn eval_function_support(
+        obj: Object,
+        num_param: usize,
+        param: Vec<String>,
+        body: String,
+    ) -> Result<(), &'static str> {
+        match obj {
+            Object::FUNCTION(f) => {
+                assert_eq!(f.parameters.len(), num_param);
+                assert_eq!(
+                    f.parameters
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<String>>(),
+                    param
+                );
+                assert_eq!(
+                    f.body
+                        .iter()
+                        .map(|b| b.to_string())
+                        .collect::<Vec<String>>()
+                        .join(", "),
+                    body
+                );
+                Ok(())
+            }
+            _ => Err("Should be a function"),
+        }
+    }
 }
