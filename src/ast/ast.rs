@@ -78,15 +78,15 @@ pub struct Identifier {
     pub value: String,
 }
 
-impl Display for Identifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
-
 impl Identifier {
     pub fn new(value: String) -> Self {
         Identifier { value }
+    }
+}
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
     }
 }
 
@@ -162,7 +162,7 @@ impl Expression {
 impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Expression::Identifier(ident) => write!(f, "{}", ident.value),
+            Expression::Identifier(ident) => write!(f, "{}", ident),
             Expression::Integer(int) => write!(f, "{}", int),
             Expression::Prefix(prefix) => write!(f, "({}{})", prefix.operator, prefix.expr),
             Expression::Infix(infix) => write!(
