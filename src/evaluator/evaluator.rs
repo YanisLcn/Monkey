@@ -4,7 +4,10 @@ use crate::{
         Identifier, IfExpression, Program,
         Statement::{self, *},
     },
-    object::{env::Environment, object::Object},
+    object::{
+        env::Environment,
+        object::{Function, Object},
+    },
     token::token::Token,
 };
 
@@ -75,8 +78,15 @@ fn eval_expression(node: Expression, env: &mut Environment) -> Object {
             eval_infix_expression(i.operator, left_expr, right_expr)
         }
         IfExpression(if_expr) => eval_if_expression(if_expr, env),
-        FnExpression(_) => todo!(),
-        CallExpression(_) => todo!(),
+        FnExpression(fun) => Object::FUNCTION(Function {
+            parameters: fun.parameters,
+            body: fun.body,
+            env: env.clone(),
+        }),
+        CallExpression(c) => match eval_expression(*c.function, env) {
+            Object::ERROR(e) => Object::ERROR(e),
+            _ => todo!(),
+        },
     }
 }
 
