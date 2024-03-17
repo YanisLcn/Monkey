@@ -234,4 +234,13 @@ pub mod evaluator_test {
             _ => Err("Should be a function"),
         }
     }
+
+    #[test]
+    fn eval_closure() {
+        let input = "let newAdder = fn(x) { fn(y) { x + y }; };
+let addTwo = newAdder(2);
+addTwo(2);";
+
+        eval_integer_object(test_eval(input), 4);
+    }
 }
