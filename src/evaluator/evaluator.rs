@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::{
     ast::ast::{
         Expression::{self, *},
@@ -83,10 +85,52 @@ fn eval_expression(node: Expression, env: &mut Environment) -> Object {
             body: fun.body,
             env: env.clone(),
         }),
-        CallExpression(c) => match eval_expression(*c.function, env) {
-            Object::ERROR(e) => Object::ERROR(e),
-            _ => todo!(),
-        },
+        CallExpression(c) => {
+            let evaluated = eval_expression(*c.function, env);
+            if is_error(&evaluated) {
+                return evaluated.clone();
+            }
+
+            let args = eval_arguments(c.arguments, env);
+
+            if args.len() == 1 && is_error(&args.first().unwrap()) {
+                return args.first().unwrap().clone();
+            }
+
+            apply_function(&evaluated, args)
+        }
+    }
+}
+
+fn eval_arguments(args: Vec<Expression>, env: &mut Environment) -> Vec<Object> {
+    args.iter()
+        .map(|e| eval_expression(e.clone(), env))
+        .collect()
+}
+
+fn apply_function(func: &Object, args: Vec<Object>) -> Object {
+    if let Object::FUNCTION(f) = func {
+        let extended_env = &mut extended_func_env(&f, args);
+        let evaluated = eval_statement_vec(f.clone().body, extended_env);
+        unwrap_return_value(evaluated)
+    } else {
+        Object::ERROR(format!("not a function : {}", func.get_type()))
+    }
+}
+
+fn extended_func_env(func: &Function, args: Vec<Object>) -> Environment {
+    let mut env = Environment::new_enclosed(Rc::new(RefCell::new(func.env.clone())));
+    func.parameters
+        .iter()
+        .zip(args.iter())
+        .for_each(|(ident, arg)| env.set(ident.value.clone(), arg.clone()));
+    env
+}
+
+fn unwrap_return_value(obj: Object) -> Object {
+    match obj {
+        Object::RETURN(r) => *r,
+        o => o,
     }
 }
 
@@ -170,7 +214,7 @@ fn eval_minus_expression(object: Object) -> Object {
 }
 
 fn eval_identifier(ident: Identifier, env: &mut Environment) -> Object {
-    env.get(ident.value.clone())
+    env.get(&ident.value)
         .unwrap_or(&Object::ERROR(format!(
             "identifier not found: {}",
             ident.value
@@ -182,6 +226,20 @@ fn is_true(object: Object) -> Object {
     match object {
         FALSE | Object::NULL | Object::INTEGER(0) => FALSE,
         _ => TRUE,
+    }
+}
+
+fn is_error(object: &Object) -> bool {
+    match object {
+        Object::ERROR(_) => true,
+        _ => false,
+    }
+}
+
+fn is_function(object: &Object) -> bool {
+    match object {
+        Object::FUNCTION(_) => true,
+        _ => false,
     }
 }
 
