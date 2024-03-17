@@ -1,9 +1,6 @@
 use std::io::{self, Write};
 
-use monkey::{
-    evaluator::evaluator::eval, lexer::lexer::Lexer, object::env::Environment,
-    parser::parser::Parser,
-};
+use monkey::{evaluator::evaluator::Evaluator, lexer::lexer::Lexer, parser::parser::Parser};
 
 const PROMPT: &str = "@ ";
 
@@ -13,7 +10,6 @@ fn main() {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
     let input = &mut String::new();
-    let env = &mut Environment::new();
 
     loop {
         input.clear();
@@ -31,6 +27,8 @@ fn main() {
             continue;
         }
 
-        println!("{}", eval(program, env));
+        let mut evaluator = Evaluator::new();
+
+        println!("{}", evaluator.eval(program));
     }
 }

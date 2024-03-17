@@ -23,13 +23,13 @@ impl Environment {
         }
     }
 
-    pub fn get(&self, name: &str) -> Option<&Object> {
+    pub fn get(&self, name: &str) -> Option<Object> {
         match self.store.get(name) {
             None => match &self.outer {
-                Some(e) => e.borrow().get(name),
+                Some(e) => e.borrow().get(&name),
                 None => None,
             },
-            get => get,
+            Some(get) => Some(get.clone()),
         }
     }
 
