@@ -62,7 +62,7 @@ impl Parser {
     pub fn parse_program(&mut self) -> Program {
         let mut program = Program::new();
 
-        while !self.current_token_is(Token::EOF) {
+        while !self.current_token_is(&Token::EOF) {
             match self.parse_statement() {
                 Some(statement) => program.push(statement),
                 None => (),
@@ -82,13 +82,13 @@ impl Parser {
     }
 
     pub fn parse_let_statement(&mut self) -> Option<Statement> {
-        if !self.expect_token(Token::IDENT(String::new())) {
+        if !self.expect_token(&Token::IDENT(String::new())) {
             return None;
         };
 
         let name: Identifier = Identifier::new(self.current_tok.to_string());
 
-        if !self.expect_token(Token::ASSIGN) {
+        if !self.expect_token(&Token::ASSIGN) {
             return None;
         };
 
@@ -102,7 +102,7 @@ impl Parser {
         };
 
         //TODO!: "We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::SEMICOLON) && !self.current_token_is(Token::EOF) {
+        while !self.current_token_is(&Token::SEMICOLON) && !self.current_token_is(&Token::EOF) {
             self.next_token();
         }
 
@@ -120,7 +120,7 @@ impl Parser {
         };
 
         //TODO!: "We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::SEMICOLON) && !self.current_token_is(Token::EOF) {
+        while !self.current_token_is(&Token::SEMICOLON) && !self.current_token_is(&Token::EOF) {
             self.next_token();
         }
 
@@ -130,7 +130,7 @@ impl Parser {
     pub fn parse_expression_statement(&mut self) -> Option<Statement> {
         let expr_statement = self.parse_expression(Precedence::LOWEST);
 
-        if self.peek_token_is(Token::SEMICOLON) {
+        if self.peek_token_is(&Token::SEMICOLON) {
             self.next_token();
         }
 
@@ -141,22 +141,22 @@ impl Parser {
     }
 
     pub fn parse_expression(&mut self, prec: Precedence) -> Option<Expression> {
-        match self.parse_prefix(self.current_tok.clone()) {
+        match self.parse_prefix(&self.current_tok.clone()) {
             None => None,
             Some(left_expr) => {
                 let mut expr = left_expr;
-                while !self.peek_token_is(Token::SEMICOLON) && prec < self.peek_precedence() {
+                while !self.peek_token_is(&Token::SEMICOLON) && prec < self.peek_precedence() {
                     self.next_token();
-                    match self.parse_infix(self.current_tok.clone(), expr.clone()) {
+                    match self.parse_infix(&self.current_tok.clone(), expr.clone()) {
                         Some(infix_expr) => {
-                            expr = infix_expr;
+                            expr = infix_expr.clone();
                         }
                         None => {
-                            return Some(expr);
+                            return Some(expr.clone());
                         }
                     }
                 }
-                Some(expr)
+                Some(expr.clone())
             }
         }
     }
@@ -175,7 +175,7 @@ impl Parser {
     }
 
     pub fn parse_boolean(&mut self) -> Option<Expression> {
-        Some(Expression::Bool(self.current_token_is(Token::TRUE)))
+        Some(Expression::Bool(self.current_token_is(&Token::TRUE)))
     }
 
     pub fn parse_prefix_expression(&mut self) -> Option<Expression> {
@@ -189,8 +189,8 @@ impl Parser {
         }
     }
 
-    pub fn parse_prefix(&mut self, token: Token) -> Option<Expression> {
-        match token {
+    pub fn parse_prefix(&mut self, token: &Token) -> Option<Expression> {
+        match &token {
             Token::IDENT(_) => self.parse_identifier(),
             Token::INT(_) => self.parse_integer(),
             Token::BANG => self.parse_prefix_expression(),
@@ -224,7 +224,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_infix(&mut self, token: Token, expr: Expression) -> Option<Expression> {
+    pub fn parse_infix(&mut self, token: &Token, expr: Expression) -> Option<Expression> {
         match token {
             Token::EQ => self.parse_infix_expression(expr),
             Token::NE => self.parse_infix_expression(expr),
@@ -248,7 +248,7 @@ impl Parser {
 
         let expr = self.parse_expression(Precedence::LOWEST);
 
-        if self.expect_token(Token::RPAREN) {
+        if self.expect_token(&Token::RPAREN) {
             expr
         } else {
             None
@@ -256,27 +256,27 @@ impl Parser {
     }
 
     pub fn parse_if_expression(&mut self) -> Option<Expression> {
-        if !self.expect_token(Token::LPAREN) {
+        if !self.expect_token(&Token::LPAREN) {
             return None;
         };
 
         self.next_token();
         let condition = self.parse_expression(Precedence::LOWEST)?;
 
-        if !self.expect_token(Token::RPAREN) {
+        if !self.expect_token(&Token::RPAREN) {
             return None;
         };
 
-        if !self.expect_token(Token::LBRACE) {
+        if !self.expect_token(&Token::LBRACE) {
             return None;
         };
 
         let consequence = self.parse_block_statements();
 
-        let alternative = if self.peek_token_is(Token::ELSE) {
+        let alternative = if self.peek_token_is(&Token::ELSE) {
             self.next_token();
 
-            if !self.expect_token(Token::LBRACE) {
+            if !self.expect_token(&Token::LBRACE) {
                 None
             } else {
                 Some(self.parse_block_statements())
@@ -293,7 +293,7 @@ impl Parser {
     }
 
     pub fn parse_function_expression(&mut self) -> Option<Expression> {
-        if !self.expect_token(Token::LPAREN) {
+        if !self.expect_token(&Token::LPAREN) {
             return None;
         };
 
@@ -307,7 +307,7 @@ impl Parser {
             None => return None,
         }
 
-        if !self.expect_token(Token::LBRACE) {
+        if !self.expect_token(&Token::LBRACE) {
             return None;
         };
 
@@ -319,7 +319,7 @@ impl Parser {
     pub fn parse_function_parameters(&mut self) -> Option<Vec<Identifier>> {
         let mut parameters = vec![];
 
-        if self.peek_token_is(Token::RPAREN) {
+        if self.peek_token_is(&Token::RPAREN) {
             self.next_token();
             return Some(parameters);
         };
@@ -329,7 +329,7 @@ impl Parser {
             value: self.current_tok.to_string(),
         });
 
-        while self.peek_token_is(Token::COMMA) {
+        while self.peek_token_is(&Token::COMMA) {
             self.next_token();
             self.next_token();
             parameters.push(Identifier {
@@ -337,7 +337,7 @@ impl Parser {
             });
         }
 
-        if !self.expect_token(Token::RPAREN) {
+        if !self.expect_token(&Token::RPAREN) {
             return None;
         }
 
@@ -348,7 +348,7 @@ impl Parser {
         let mut block = vec![];
 
         self.next_token();
-        while !self.current_token_is(Token::RBRACE) && !self.current_token_is(Token::EOF) {
+        while !self.current_token_is(&Token::RBRACE) && !self.current_token_is(&Token::EOF) {
             let stmt = self.parse_statement();
 
             match stmt {
@@ -373,7 +373,7 @@ impl Parser {
     pub fn parse_call_arguments(&mut self) -> Option<Vec<Expression>> {
         let mut args = vec![];
 
-        if self.peek_token_is(Token::RPAREN) {
+        if self.peek_token_is(&Token::RPAREN) {
             self.next_token();
             return Some(args);
         };
@@ -389,7 +389,7 @@ impl Parser {
             }
         }
 
-        while self.peek_token_is(Token::COMMA) {
+        while self.peek_token_is(&Token::COMMA) {
             self.next_token();
             self.next_token();
 
@@ -403,28 +403,32 @@ impl Parser {
             }
         }
 
-        if !self.expect_token(Token::RPAREN) {
+        if !self.expect_token(&Token::RPAREN) {
             return None;
         }
 
         Some(args)
     }
 
-    pub fn current_token_is(&self, token: Token) -> bool {
-        self.current_tok == token
-    }
-
-    pub fn peek_token_is(&self, token: Token) -> bool {
-        match &self.peek_tok {
-            Token::IDENT(_) => matches!(token, Token::IDENT(_)),
-            Token::INT(_) => matches!(token, Token::INT(_)),
-            Token::STRING(_) => matches!(token, Token::STRING(_)),
-            peek_tok => *peek_tok == token,
+    fn compare_tokens(&self, token_a: &Token, token_b: &Token) -> bool {
+        match token_a {
+            Token::IDENT(_) => matches!(token_b, Token::IDENT(_)),
+            Token::INT(_) => matches!(token_b, Token::INT(_)),
+            Token::STRING(_) => matches!(token_b, Token::STRING(_)),
+            a => *a == *token_b,
         }
     }
 
-    pub fn expect_token(&mut self, token: Token) -> bool {
-        if self.peek_token_is(token.clone()) {
+    pub fn current_token_is(&self, token: &Token) -> bool {
+        self.compare_tokens(&self.current_tok, token)
+    }
+
+    pub fn peek_token_is(&self, token: &Token) -> bool {
+        self.compare_tokens(&self.peek_tok, token)
+    }
+
+    pub fn expect_token(&mut self, token: &Token) -> bool {
+        if self.peek_token_is(token) {
             self.next_token();
             true
         } else {
@@ -437,7 +441,7 @@ impl Parser {
                 .to_string(),
             );
 
-            while !self.current_token_is(Token::SEMICOLON) {
+            while !self.current_token_is(&Token::SEMICOLON) {
                 self.next_token();
             }
             false
