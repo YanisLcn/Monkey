@@ -1,6 +1,6 @@
-use std::{fmt, mem};
+use std::fmt;
 
-#[derive(Clone, Debug, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Token {
     ILLEGAL(String),
     EOF,
@@ -43,12 +43,6 @@ pub enum Token {
     RETURN,
     TRUE,
     FALSE,
-}
-
-impl PartialEq for Token {
-    fn eq(&self, other: &Self) -> bool {
-        mem::discriminant(self) == mem::discriminant(other)
-    }
 }
 
 impl fmt::Display for Token {

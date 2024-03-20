@@ -415,11 +415,16 @@ impl Parser {
     }
 
     pub fn peek_token_is(&self, token: Token) -> bool {
-        self.peek_tok == token
+        match &self.peek_tok {
+            Token::IDENT(_) => matches!(token, Token::IDENT(_)),
+            Token::INT(_) => matches!(token, Token::INT(_)),
+            Token::STRING(_) => matches!(token, Token::STRING(_)),
+            peek_tok => *peek_tok == token,
+        }
     }
 
     pub fn expect_token(&mut self, token: Token) -> bool {
-        if self.peek_tok == token {
+        if self.peek_token_is(token.clone()) {
             self.next_token();
             true
         } else {
