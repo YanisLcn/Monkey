@@ -191,7 +191,7 @@ if (5 < 10) {
             .for_each(|token| assert_eq!(lexer.next_token(), *token));
     }
 
-    #[allow(dead_code)]
+    #[test]
     fn extended_tokens_with_strings() {
         let input = "let five = 5;
 let ten = 10;

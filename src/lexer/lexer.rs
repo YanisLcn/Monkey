@@ -70,6 +70,18 @@ impl Lexer {
         self.input[start_index..self.index].to_string()
     }
 
+    pub fn read_string(&mut self) -> String {
+        let start_index = self.index + 1;
+        loop {
+            self.read_char();
+            match self.ch {
+                '\"' | '\0' => break,
+                _ => continue,
+            }
+        }
+        self.input[start_index..self.index].to_string()
+    }
+
     pub fn next_token(&mut self) -> Token {
         self.skip_whitespace();
 
@@ -100,6 +112,7 @@ impl Lexer {
             ',' => Token::COMMA,
             ';' => Token::SEMICOLON,
             ':' => Token::COLON,
+            '"' => Token::STRING(self.read_string()),
 
             '(' => Token::LPAREN,
             ')' => Token::RPAREN,
