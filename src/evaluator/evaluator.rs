@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, string::String};
 
 use crate::{
     ast::ast::{
@@ -176,6 +176,9 @@ impl Evaluator {
             (Object::BOOLEAN(a), Object::BOOLEAN(b)) => {
                 self.eval_boolean_infix_expression(operator, a, b)
             }
+            (Object::STRING(a), Object::STRING(b)) => {
+                self.eval_string_infix_expression(operator, a, b)
+            }
             (s, t) if !PartialEq::eq(&s, &t) => Object::ERROR(format!(
                 "type mismatch: {} {} {}",
                 s.get_type(),
@@ -210,6 +213,13 @@ impl Evaluator {
             Token::GT => self.native_bool_to_object(a > b),
             Token::LT => self.native_bool_to_object(a < b),
             _ => Object::ERROR(format!("unknown operator: INTEGER {} INTEGER", operator)),
+        }
+    }
+
+    fn eval_string_infix_expression(&mut self, operator: Token, a: String, b: String) -> Object {
+        match operator {
+            Token::PLUS => Object::STRING(a + &b),
+            _ => Object::ERROR(format!("unknown operator: STRING {} STRING", operator)),
         }
     }
 
