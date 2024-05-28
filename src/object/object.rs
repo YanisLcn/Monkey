@@ -8,6 +8,7 @@ use super::env::Environment;
 pub enum Object {
     INTEGER(i32),
     BOOLEAN(bool),
+    STRING(String),
     NULL,
     RETURN(Box<Object>),
     ERROR(String),
@@ -26,6 +27,7 @@ impl Object {
         match self {
             Object::INTEGER(_) => "INTEGER".to_string(),
             Object::BOOLEAN(_) => "BOOLEAN".to_string(),
+            Object::STRING(_) => "STRING".to_string(),
             Object::NULL => "NULL".to_string(),
             Object::RETURN(obj) => obj.get_type(),
             Object::ERROR(_) => "ERROR".to_string(),
@@ -39,6 +41,7 @@ impl fmt::Display for Object {
         match self {
             Object::INTEGER(x) => write!(f, "{x}"),
             Object::BOOLEAN(b) => write!(f, "{b}"),
+            Object::STRING(s) => write!(f, "{s}"),
             Object::NULL => write!(f, "null"),
             Object::RETURN(r) => write!(f, "return {r}"),
             Object::ERROR(s) => write!(f, "{s}"),

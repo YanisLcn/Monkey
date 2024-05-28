@@ -95,6 +95,15 @@ pub mod evaluator_test {
     }
 
     #[test]
+    fn eval_string() {
+        let input_expctdvalue = vec![("\"hello world\"", "hello world")];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| assert_eq!(test_eval(i), Object::STRING(v.to_string())));
+    }
+
+    #[test]
     fn eval_if_expression() {
         let input_expctdvalue = vec![
             ("if (true) { 10 }", Object::INTEGER(10)),

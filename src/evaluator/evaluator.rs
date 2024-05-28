@@ -75,6 +75,7 @@ impl Evaluator {
             Identifier(i) => self.eval_identifier(i),
             Integer(i) => Object::INTEGER(i),
             Bool(b) => self.native_bool_to_object(b),
+            String(s) => Object::STRING(s),
             Prefix(p) => match self.eval_expression(*p.expr) {
                 Object::ERROR(e) => Object::ERROR(e),
                 obj => self.eval_prefix_expression(p.operator, obj),
