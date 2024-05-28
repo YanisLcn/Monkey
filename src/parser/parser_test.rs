@@ -133,6 +133,17 @@ return 838383;
     }
 
     #[test]
+    fn test_string() {
+        let input = "\"hello world\"";
+
+        let expected_statements = vec![Statement::ExpressionStatement(Expression::String(
+            "hello world".to_string(),
+        ))];
+
+        test_parsing_statements(input, 0, expected_statements)
+    }
+
+    #[test]
     fn test_parsing_prefix_expression() {
         let input = "!5; -15; !false";
 

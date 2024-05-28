@@ -146,6 +146,7 @@ pub enum Expression {
     Identifier(Identifier),
     Integer(i32),
     Bool(bool),
+    String(String),
     Prefix(PrefixExpr),
     Infix(InfixExpr),
     IfExpression(IfExpression),
@@ -164,13 +165,14 @@ impl Display for Expression {
         match self {
             Expression::Identifier(ident) => write!(f, "{}", ident),
             Expression::Integer(int) => write!(f, "{}", int),
+            Expression::Bool(bool) => write!(f, "{}", bool),
+            Expression::String(str) => write!(f, "{}", str),
             Expression::Prefix(prefix) => write!(f, "({}{})", prefix.operator, prefix.expr),
             Expression::Infix(infix) => write!(
                 f,
                 "({} {} {})",
                 infix.left_expr, infix.operator, infix.right_expr
             ),
-            Expression::Bool(bool) => write!(f, "{}", bool),
             Expression::IfExpression(ifexpr) => {
                 write!(f, "if {} {{ ", ifexpr.condition)?;
                 for stmt in ifexpr.consequence.iter() {

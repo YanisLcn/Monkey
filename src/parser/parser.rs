@@ -174,6 +174,13 @@ impl Parser {
         }
     }
 
+    pub fn parse_string(&mut self) -> Option<Expression> {
+        match &self.current_tok {
+            Token::STRING(s) => Some(Expression::String(s.to_string())),
+            _ => None,
+        }
+    }
+
     pub fn parse_boolean(&mut self) -> Option<Expression> {
         Some(Expression::Bool(self.current_token_is(&Token::TRUE)))
     }
@@ -193,6 +200,7 @@ impl Parser {
         match &token {
             Token::IDENT(_) => self.parse_identifier(),
             Token::INT(_) => self.parse_integer(),
+            Token::STRING(_) => self.parse_string(),
             Token::BANG => self.parse_prefix_expression(),
             Token::SUB => self.parse_prefix_expression(),
             Token::TRUE => self.parse_boolean(),
