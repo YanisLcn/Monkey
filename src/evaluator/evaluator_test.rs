@@ -262,4 +262,32 @@ addTwo(2);";
 
         eval_integer_object(test_eval(input), 4);
     }
+
+    #[test]
+    fn builtin_len() {
+        let input_expctdvalue = vec![
+            ("len(\"\")", 0),
+            ("len(\"four\")", 4),
+            ("len(\"hello world\")", 11),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| assert_eq!(test_eval(i), Object::INTEGER(*v)));
+    }
+
+    #[test]
+    fn builtin_len_error() {
+        let input_expctdvalue = vec![
+            ("len(1)", "Argument type not supported by `len`."),
+            (
+                "len(\"one\", \"two\")",
+                "Wrong number of arguments. Expected: 1 | Got: 2",
+            ),
+        ];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| assert_eq!(test_eval(i), Object::ERROR(v.to_string())));
+    }
 }
