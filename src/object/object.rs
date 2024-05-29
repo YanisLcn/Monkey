@@ -1,8 +1,6 @@
-use std::fmt;
-
+use super::{builtin::BuiltinFunction, env::Environment};
 use crate::ast::ast::{Identifier, Statement};
-
-use super::env::Environment;
+use std::fmt;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Object {
@@ -13,6 +11,7 @@ pub enum Object {
     RETURN(Box<Object>),
     ERROR(String),
     FUNCTION(Function),
+    BUILTIN(BuiltinFunction),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,6 +31,7 @@ impl Object {
             Object::RETURN(obj) => obj.get_type(),
             Object::ERROR(_) => "ERROR".to_string(),
             Object::FUNCTION(_) => "FUNCTION".to_string(),
+            Object::BUILTIN(_) => "BUILTIN".to_string(),
         }
     }
 }
@@ -55,6 +55,7 @@ impl fmt::Display for Object {
                     .join(","),
                 fun.body
             ),
+            Object::BUILTIN(_) => write!(f, "builtin"),
         }
     }
 }
