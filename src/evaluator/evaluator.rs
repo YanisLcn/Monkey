@@ -7,6 +7,7 @@ use crate::{
         Statement::{self, *},
     },
     object::{
+        builtin::BuiltinFunction,
         env::Environment,
         object::{Function, Object},
     },
@@ -123,15 +124,19 @@ impl Evaluator {
     }
 
     fn apply_function(&mut self, func: &Object, args: Vec<Object>) -> Object {
-        if let Object::FUNCTION(f) = func {
-            let extended_env = self.extended_func_env(&f, args);
-            let old_env = Rc::clone(&self.env);
-            self.env = Rc::new(RefCell::new(extended_env));
-            let evaluated = self.eval_statement_vec(f.clone().body);
-            self.env = old_env;
-            self.unwrap_return_value(evaluated)
-        } else {
-            Object::ERROR(format!("not a function : {}", func.get_type()))
+        match func {
+            Object::FUNCTION(f) => {
+                let extended_env = self.extended_func_env(&f, args);
+                let old_env = Rc::clone(&self.env);
+                self.env = Rc::new(RefCell::new(extended_env));
+                let evaluated = self.eval_statement_vec(f.clone().body);
+                self.env = old_env;
+                self.unwrap_return_value(evaluated)
+            }
+            Object::BUILTIN(builtin) => {
+                builtin.call(args)
+            }
+            _ => Object::ERROR(format!("not a function : {}", func.get_type())),
         }
     }
 
@@ -250,14 +255,15 @@ impl Evaluator {
     }
 
     fn eval_identifier(&mut self, ident: Identifier) -> Object {
-        self.env
-            .borrow()
-            .get(&ident.value)
-            .unwrap_or(Object::ERROR(format!(
-                "identifier not found: {}",
-                ident.value
-            )))
-            .clone()
+        match self.env.borrow().get(&ident.value) {
+            Some(result) => return result,
+            None => (),
+        }
+
+        match BuiltinFunction::get_builtin(&ident.value) {
+            Some(result) => result,
+            None => return Object::ERROR(format!("identifier not found: {}", ident.value)),
+        }
     }
 
     fn is_true(&mut self, object: Object) -> Object {
