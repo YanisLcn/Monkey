@@ -2,7 +2,7 @@
 pub mod parser_test {
     use crate::{
         ast::ast::{
-            CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
+            Arrays, CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
             LetStatement, PrefixExpr, ReturnStatement, Statement,
         },
         lexer::lexer::Lexer,
@@ -312,6 +312,29 @@ return 838383;
         input_expect
             .iter()
             .for_each(|(i, e)| test_parsing_display_format(i, e));
+    }
+
+    #[test]
+    fn parse_arrays() {
+        let input = "[1, 2 * 2, 3 + 3]";
+
+        let expected = vec![build_stmt_from_expr(Expression::Arrays(Arrays {
+            elements: vec![
+                Expression::Integer(1),
+                Expression::Infix(InfixExpr {
+                    left_expr: Box::new(Expression::Integer(2)),
+                    operator: Token::MUL,
+                    right_expr: Box::new(Expression::Integer(2)),
+                }),
+                Expression::Infix(InfixExpr {
+                    left_expr: Box::new(Expression::Integer(3)),
+                    operator: Token::PLUS,
+                    right_expr: Box::new(Expression::Integer(3)),
+                }),
+            ],
+        }))];
+
+        test_parsing_statements(input, 0, expected);
     }
 
     fn build_ident_expr(name: &str) -> Expression {

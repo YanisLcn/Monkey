@@ -142,6 +142,11 @@ pub struct CallExpression {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Arrays {
+    pub elements: Vec<Expression>,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     Identifier(Identifier),
     Integer(i32),
@@ -152,6 +157,7 @@ pub enum Expression {
     IfExpression(IfExpression),
     FnExpression(FnExpression),
     CallExpression(CallExpression),
+    Arrays(Arrays),
 }
 
 impl Expression {
@@ -213,6 +219,18 @@ impl Display for Expression {
                     .collect::<Vec<String>>()
                     .join(", ");
                 write!(f, "{}({})", call.function, args)
+            }
+            Expression::Arrays(array) => {
+                write!(
+                    f,
+                    "[{}]",
+                    array
+                        .elements
+                        .iter()
+                        .map(|arg| format!("{}", arg))
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                )
             }
         }
     }

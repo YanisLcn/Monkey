@@ -1,6 +1,6 @@
 use crate::{
     ast::ast::{
-        CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
+        Arrays, CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
         LetStatement, PrefixExpr, Program, ReturnStatement, Statement,
     },
     lexer::lexer::Lexer,
@@ -208,6 +208,7 @@ impl Parser {
             Token::LPAREN => self.parse_grouped_expression(),
             Token::IF => self.parse_if_expression(),
             Token::FUNCTION => self.parse_function_expression(),
+            Token::LBRACKET => self.parse_arrays(),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No prefix parse function found for {}.", t).to_string());
@@ -378,10 +379,10 @@ impl Parser {
         }
     }
 
-    pub fn parse_call_arguments(&mut self) -> Option<Vec<Expression>> {
+    fn parse_list(&mut self, end_token: Token) -> Option<Vec<Expression>> {
         let mut args = vec![];
 
-        if self.peek_token_is(&Token::RPAREN) {
+        if self.peek_token_is(&end_token) {
             self.next_token();
             return Some(args);
         };
@@ -411,11 +412,21 @@ impl Parser {
             }
         }
 
-        if !self.expect_token(&Token::RPAREN) {
+        if !self.expect_token(&end_token) {
             return None;
         }
 
         Some(args)
+    }
+
+    pub fn parse_call_arguments(&mut self) -> Option<Vec<Expression>> {
+        self.parse_list(Token::RPAREN)
+    }
+
+    fn parse_arrays(&mut self) -> Option<Expression> {
+        Some(Expression::Arrays(Arrays {
+            elements: self.parse_list(Token::RBRACKET)?,
+        }))
     }
 
     fn compare_tokens(&self, token_a: &Token, token_b: &Token) -> bool {

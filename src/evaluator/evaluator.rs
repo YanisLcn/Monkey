@@ -114,6 +114,7 @@ impl Evaluator {
 
                 self.apply_function(&evaluated, args)
             }
+            Arrays(_) => todo!(),
         }
     }
 
@@ -133,9 +134,7 @@ impl Evaluator {
                 self.env = old_env;
                 self.unwrap_return_value(evaluated)
             }
-            Object::BUILTIN(builtin) => {
-                builtin.call(args)
-            }
+            Object::BUILTIN(builtin) => builtin.call(args),
             _ => Object::ERROR(format!("not a function : {}", func.get_type())),
         }
     }
