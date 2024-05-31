@@ -5,6 +5,7 @@ pub enum BuiltinFunction {
     LEN,
     FIRST,
     LAST,
+    TAIL,
 }
 
 impl BuiltinFunction {
@@ -17,6 +18,7 @@ impl BuiltinFunction {
             "len" => Ok(Object::BUILTIN(Self::LEN)),
             "first" => Ok(Object::BUILTIN(Self::FIRST)),
             "last" => Ok(Object::BUILTIN(Self::LAST)),
+            "tail" => Ok(Object::BUILTIN(Self::TAIL)),
             _ => Result::Err(()),
         }
     }
@@ -26,6 +28,7 @@ impl BuiltinFunction {
             BuiltinFunction::LEN => Self::call_len(args),
             BuiltinFunction::FIRST => Self::call_first(args),
             BuiltinFunction::LAST => Self::call_last(args),
+            BuiltinFunction::TAIL => Self::call_tail(args),
         }
     }
 
@@ -47,7 +50,20 @@ impl BuiltinFunction {
     fn call_last(args: Vec<Object>) -> Object {
         Self::handle_expected_number_arguments(1, args.len()).unwrap_or_else(|| match &args[0] {
             Object::ARRAY(a) => a.last().unwrap_or(&Object::NULL).clone(),
-            _ => Object::ERROR("Argument type not supported by `first`.".to_string()),
+            _ => Object::ERROR("Argument type not supported by `last`.".to_string()),
+        })
+    }
+
+    fn call_tail(args: Vec<Object>) -> Object {
+        Self::handle_expected_number_arguments(1, args.len()).unwrap_or_else(|| match &args[0] {
+            Object::ARRAY(a) => {
+                if a.len() > 0 {
+                    Object::ARRAY(a[1..].to_vec())
+                } else {
+                    Object::NULL
+                }
+            }
+            _ => Object::ERROR("Argument type not supported by `tail`.".to_string()),
         })
     }
 
