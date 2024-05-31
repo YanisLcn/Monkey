@@ -147,6 +147,12 @@ pub struct Arrays {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Indexed {
+    pub left_expr: Box<Expression>,
+    pub index: Box<Expression>,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     Identifier(Identifier),
     Integer(i32),
@@ -158,6 +164,7 @@ pub enum Expression {
     FnExpression(FnExpression),
     CallExpression(CallExpression),
     Arrays(Arrays),
+    Indexed(Indexed),
 }
 
 impl Expression {
@@ -232,6 +239,7 @@ impl Display for Expression {
                         .join(", ")
                 )
             }
+            Expression::Indexed(index) => write!(f, "{}[{}]", index.left_expr, index.index),
         }
     }
 }

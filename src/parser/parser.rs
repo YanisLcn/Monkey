@@ -1,7 +1,7 @@
 use crate::{
     ast::ast::{
-        Arrays, CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
-        LetStatement, PrefixExpr, Program, ReturnStatement, Statement,
+        Arrays, CallExpression, Expression, FnExpression, Identifier, IfExpression, Indexed,
+        InfixExpr, LetStatement, PrefixExpr, Program, ReturnStatement, Statement,
     },
     lexer::lexer::Lexer,
     token::token::Token,
@@ -23,6 +23,7 @@ pub enum Precedence {
     PRODUCT = 5,
     PREFIX = 6,
     CALL = 7,
+    INDEX = 8,
 }
 
 fn token_to_precedence(token: Token) -> Precedence {
@@ -36,6 +37,7 @@ fn token_to_precedence(token: Token) -> Precedence {
         Token::MUL => Precedence::PRODUCT,
         Token::DIV => Precedence::PRODUCT,
         Token::LPAREN => Precedence::CALL,
+        Token::LBRACKET => Precedence::INDEX,
         _ => Precedence::LOWEST,
     }
 }
@@ -244,6 +246,7 @@ impl Parser {
             Token::MUL => self.parse_infix_expression(expr),
             Token::DIV => self.parse_infix_expression(expr),
             Token::LPAREN => self.parse_call_expression(expr),
+            Token::LBRACKET => self.parse_index_expression(expr),
             Token::ILLEGAL(_) => None,
             t => {
                 self.peek_errors(format!("No infix parse function found for {}.", t).to_string());
@@ -426,6 +429,20 @@ impl Parser {
     fn parse_arrays(&mut self) -> Option<Expression> {
         Some(Expression::Arrays(Arrays {
             elements: self.parse_list(Token::RBRACKET)?,
+        }))
+    }
+
+    fn parse_index_expression(&mut self, expr: Expression) -> Option<Expression> {
+        self.next_token();
+        let index = self.parse_expression(Precedence::LOWEST)?;
+
+        if !self.expect_token(&Token::RBRACKET) {
+            return None;
+        };
+
+        Some(Expression::Indexed(Indexed {
+            left_expr: Box::new(expr),
+            index: Box::new(index),
         }))
     }
 

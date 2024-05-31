@@ -115,6 +115,7 @@ impl Evaluator {
                 self.apply_function(&evaluated, args)
             }
             Arrays(_) => todo!(),
+            Indexed(_) => todo!(),
         }
     }
 

@@ -2,8 +2,8 @@
 pub mod parser_test {
     use crate::{
         ast::ast::{
-            Arrays, CallExpression, Expression, FnExpression, Identifier, IfExpression, InfixExpr,
-            LetStatement, PrefixExpr, ReturnStatement, Statement,
+            Arrays, CallExpression, Expression, FnExpression, Identifier, IfExpression, Indexed,
+            InfixExpr, LetStatement, PrefixExpr, ReturnStatement, Statement,
         },
         lexer::lexer::Lexer,
         parser::parser::Parser,
@@ -307,6 +307,14 @@ return 838383;
                 "add(a + b + c * d / f + g)",
                 "add((((a + b) + ((c * d) / f)) + g));",
             ),
+            (
+                "a * [1, 2, 3, 4][b * c] * d",
+                "((a * [1, 2, 3, 4][(b * c)]) * d);",
+            ),
+            (
+                "add(a * b[2], b[1], 2 * [1, 2][1])",
+                "add((a * b[2]), b[1], (2 * [1, 2][1]));",
+            ),
         ];
 
         input_expect
@@ -332,6 +340,24 @@ return 838383;
                     right_expr: Box::new(Expression::Integer(3)),
                 }),
             ],
+        }))];
+
+        test_parsing_statements(input, 0, expected);
+    }
+
+    #[test]
+    fn parse_indexed_expressions() {
+        let input = "myArray[1 + 1]";
+
+        let expected = vec![build_stmt_from_expr(Expression::Indexed(Indexed {
+            left_expr: Box::new(Expression::Identifier(Identifier {
+                value: "myArray".to_string(),
+            })),
+            index: Box::new(Expression::Infix(InfixExpr {
+                left_expr: Box::new(Expression::Integer(1)),
+                operator: Token::PLUS,
+                right_expr: Box::new(Expression::Integer(1)),
+            })),
         }))];
 
         test_parsing_statements(input, 0, expected);
