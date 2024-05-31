@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, string::String};
+use std::{cell::RefCell, rc::Rc, string::String, usize};
 
 use crate::{
     ast::ast::{
@@ -123,7 +123,17 @@ impl Evaluator {
 
                 return Object::ARRAY(elements);
             }
-            Indexed(_) => todo!(),
+            Indexed(i) => {
+                let left = self.eval_expression(*i.left_expr);
+                if self.is_error(&left) {
+                    return left;
+                }
+                let index = self.eval_expression(*i.index);
+                if self.is_error(&index) {
+                    return index;
+                }
+                return self.eval_index_expression(left, index);
+            }
         }
     }
 
@@ -271,6 +281,21 @@ impl Evaluator {
         match BuiltinFunction::get_builtin(&ident.value) {
             Some(result) => result,
             None => return Object::ERROR(format!("identifier not found: {}", ident.value)),
+        }
+    }
+
+    fn eval_index_expression(&mut self, left: Object, index: Object) -> Object {
+        match (left, index) {
+            (Object::ARRAY(a), Object::INTEGER(i)) => self.eval_array_index_expression(a, i),
+            (obj, _) => Object::ERROR(format!("index operator not supported for {obj}.")),
+        }
+    }
+
+    fn eval_array_index_expression(&mut self, left: Vec<Object>, index: i32) -> Object {
+        if index < 0 || index > (left.len() - 1).try_into().unwrap() {
+            return Object::NULL;
+        } else {
+            left.get(index as usize).unwrap().clone()
         }
     }
 
