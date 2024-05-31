@@ -3,6 +3,8 @@ use super::object::Object;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BuiltinFunction {
     LEN,
+    FIRST,
+    LAST,
 }
 
 impl BuiltinFunction {
@@ -13,6 +15,8 @@ impl BuiltinFunction {
     fn from(name: &str) -> Result<Object, ()> {
         match name {
             "len" => Ok(Object::BUILTIN(Self::LEN)),
+            "first" => Ok(Object::BUILTIN(Self::FIRST)),
+            "last" => Ok(Object::BUILTIN(Self::LAST)),
             _ => Result::Err(()),
         }
     }
@@ -20,6 +24,8 @@ impl BuiltinFunction {
     pub fn call(&self, args: Vec<Object>) -> Object {
         match self {
             BuiltinFunction::LEN => Self::call_len(args),
+            BuiltinFunction::FIRST => Self::call_first(args),
+            BuiltinFunction::LAST => Self::call_last(args),
         }
     }
 
@@ -28,6 +34,20 @@ impl BuiltinFunction {
             Object::STRING(s) => Object::INTEGER(s.len().try_into().unwrap()),
             Object::ARRAY(a) => Object::INTEGER(a.len().try_into().unwrap()),
             _ => Object::ERROR("Argument type not supported by `len`.".to_string()),
+        })
+    }
+
+    fn call_first(args: Vec<Object>) -> Object {
+        Self::handle_expected_number_arguments(1, args.len()).unwrap_or_else(|| match &args[0] {
+            Object::ARRAY(a) => a.first().unwrap_or(&Object::NULL).clone(),
+            _ => Object::ERROR("Argument type not supported by `first`.".to_string()),
+        })
+    }
+
+    fn call_last(args: Vec<Object>) -> Object {
+        Self::handle_expected_number_arguments(1, args.len()).unwrap_or_else(|| match &args[0] {
+            Object::ARRAY(a) => a.last().unwrap_or(&Object::NULL).clone(),
+            _ => Object::ERROR("Argument type not supported by `first`.".to_string()),
         })
     }
 
