@@ -103,7 +103,7 @@ impl Evaluator {
             CallExpression(c) => {
                 let evaluated = self.eval_expression(*c.function);
                 if self.is_error(&evaluated) {
-                    return evaluated.clone();
+                    return evaluated;
                 }
 
                 let args = self.eval_arguments(c.arguments);
@@ -114,7 +114,15 @@ impl Evaluator {
 
                 self.apply_function(&evaluated, args)
             }
-            Arrays(_) => todo!(),
+            Arrays(a) => {
+                let elements = self.eval_arguments(a.elements);
+
+                if elements.len() == 1 && self.is_error(&elements.first().unwrap()) {
+                    return elements.first().unwrap().clone();
+                }
+
+                return Object::ARRAY(elements);
+            }
             Indexed(_) => todo!(),
         }
     }

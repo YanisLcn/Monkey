@@ -12,6 +12,7 @@ pub enum Object {
     ERROR(String),
     FUNCTION(Function),
     BUILTIN(BuiltinFunction),
+    ARRAY(Vec<Object>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,6 +33,7 @@ impl Object {
             Object::ERROR(_) => "ERROR".to_string(),
             Object::FUNCTION(_) => "FUNCTION".to_string(),
             Object::BUILTIN(_) => "BUILTIN".to_string(),
+            Object::ARRAY(_) => "ARRAY".to_string(),
         }
     }
 }
@@ -52,10 +54,18 @@ impl fmt::Display for Object {
                     .iter()
                     .map(|f| format!("{f}"))
                     .collect::<Vec<String>>()
-                    .join(","),
+                    .join(", "),
                 fun.body
             ),
             Object::BUILTIN(_) => write!(f, "builtin"),
+            Object::ARRAY(v) => write!(
+                f,
+                "[{}]",
+                v.iter()
+                    .map(|f| format!("{f}"))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ),
         }
     }
 }

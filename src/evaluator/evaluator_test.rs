@@ -290,4 +290,16 @@ addTwo(2);";
             .iter()
             .for_each(|(i, v)| assert_eq!(test_eval(i), Object::ERROR(v.to_string())));
     }
+
+    #[test]
+    fn array_literals() {
+        let input_expctdvalue = vec![(
+            "[1, 2 * 2, 3 + 3]",
+            vec![Object::INTEGER(1), Object::INTEGER(4), Object::INTEGER(6)],
+        )];
+
+        input_expctdvalue
+            .iter()
+            .for_each(|(i, v)| assert_eq!(test_eval(i), Object::ARRAY(v.to_vec())));
+    }
 }
