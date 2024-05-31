@@ -26,6 +26,7 @@ impl BuiltinFunction {
     fn call_len(args: Vec<Object>) -> Object {
         Self::handle_expected_number_arguments(1, args.len()).unwrap_or_else(|| match &args[0] {
             Object::STRING(s) => Object::INTEGER(s.len().try_into().unwrap()),
+            Object::ARRAY(a) => Object::INTEGER(a.len().try_into().unwrap()),
             _ => Object::ERROR("Argument type not supported by `len`.".to_string()),
         })
     }
