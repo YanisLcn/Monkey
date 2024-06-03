@@ -202,6 +202,7 @@ pub mod evaluator_test {
             ("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
             ("let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20),
             ("fn(x) { x; }(5)", 5),
+            ("let f = fn(x, y) { if (y < 0) { return x; } f(x + 1, y - 1) }; f(4, 1);", 6), 
         ];
 
         input_expctdvalue

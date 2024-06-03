@@ -30,7 +30,10 @@ impl Evaluator {
     }
 
     pub fn eval(&mut self, node: Program) -> Object {
-        self.eval_statement_vec(node.statements)
+        match self.eval_statement_vec(node.statements) {
+            Object::RETURN(r) => *r,
+            o => o,
+        }
     }
 
     pub fn eval_statement_vec(&mut self, nodes: Vec<Statement>) -> Object {
@@ -38,8 +41,8 @@ impl Evaluator {
         for stmt in nodes.iter() {
             let evaluated = self.eval_statement(stmt.clone());
             match evaluated {
-                Object::RETURN(r) => {
-                    return *r;
+                Object::RETURN(_) => {
+                    return evaluated;
                 }
                 Object::ERROR(e) => {
                     return Object::ERROR(e);
@@ -98,7 +101,7 @@ impl Evaluator {
             FnExpression(fun) => Object::FUNCTION(Function {
                 parameters: fun.parameters,
                 body: fun.body,
-                env: self.env.borrow_mut().clone(),
+                env: Rc::clone(&self.env),
             }),
             CallExpression(c) => {
                 let evaluated = self.eval_expression(*c.function);
@@ -159,7 +162,7 @@ impl Evaluator {
     }
 
     fn extended_func_env(&mut self, func: &Function, args: Vec<Object>) -> Environment {
-        let mut env = Environment::new_enclosed(Rc::new(RefCell::new(func.env.clone())));
+        let mut env = Environment::new_enclosed(Rc::clone(&func.env));
         func.parameters
             .iter()
             .zip(args.iter())

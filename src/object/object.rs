@@ -1,6 +1,6 @@
 use super::{builtin::BuiltinFunction, env::Environment};
 use crate::ast::ast::{Identifier, Statement};
-use std::fmt;
+use std::{cell::RefCell, fmt, rc::Rc};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Object {
@@ -19,7 +19,7 @@ pub enum Object {
 pub struct Function {
     pub parameters: Vec<Identifier>,
     pub body: Vec<Statement>,
-    pub env: Environment,
+    pub env: Rc<RefCell<Environment>>,
 }
 
 impl Object {
