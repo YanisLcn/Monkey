@@ -6,6 +6,7 @@ pub enum BuiltinFunction {
     FIRST,
     LAST,
     TAIL,
+    PUSH,
 }
 
 impl BuiltinFunction {
@@ -19,6 +20,7 @@ impl BuiltinFunction {
             "first" => Ok(Object::BUILTIN(Self::FIRST)),
             "last" => Ok(Object::BUILTIN(Self::LAST)),
             "tail" => Ok(Object::BUILTIN(Self::TAIL)),
+            "push" => Ok(Object::BUILTIN(Self::PUSH)),
             _ => Result::Err(()),
         }
     }
@@ -29,6 +31,7 @@ impl BuiltinFunction {
             BuiltinFunction::FIRST => Self::call_first(args),
             BuiltinFunction::LAST => Self::call_last(args),
             BuiltinFunction::TAIL => Self::call_tail(args),
+            BuiltinFunction::PUSH => Self::call_push(args),
         }
     }
 
@@ -64,6 +67,19 @@ impl BuiltinFunction {
                 }
             }
             _ => Object::ERROR("Argument type not supported by `tail`.".to_string()),
+        })
+    }
+
+    fn call_push(args: Vec<Object>) -> Object {
+        Self::handle_expected_number_arguments(2, args.len()).unwrap_or_else(|| {
+            match (&args[0], &args[1]) {
+                (Object::ARRAY(a), obj) => {
+                    let mut b = a.clone();
+                    b.push(obj.clone());
+                    Object::ARRAY(b)
+                }
+                _ => Object::ERROR("Argument type not supported by `last`.".to_string()),
+            }
         })
     }
 
